@@ -1,19 +1,21 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, HelpCircle, TrendingUp } from "lucide-react";
-import type { CropRecommendation } from "@/lib/mockData";
+
+import type { RecommendationItem } from "@/services/api";
+import { formatQty, formatSignedQty } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { ConfidenceIndicator, Metric, OpportunityScore, Pill, RiskBadge } from "./primitives";
 
 export function CropRecommendationCard({
   rec,
-  rank,
   onWhy,
 }: {
-  rec: CropRecommendation;
-  rank: number;
-  onWhy: (rec: CropRecommendation) => void;
+  rec: RecommendationItem;
+  onWhy: (rec: RecommendationItem) => void;
 }) {
-  const primary = rank === 1;
+  const primary = rec.rank === 1;
+  const unit = rec.unit ?? "";
+  const gap = rec.demand_gap;
 
   return (
     <article
@@ -31,44 +33,62 @@ export function CropRecommendationCard({
                 primary ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
               )}
             >
-              #{rank}
+              #{rec.rank}
             </span>
-            <h3 className={cn("truncate font-bold text-foreground", primary ? "text-2xl md:text-3xl" : "text-xl")}>
-              {rec.crop}
+            <h3
+              className={cn(
+                "truncate font-bold text-foreground",
+                primary ? "text-2xl md:text-3xl" : "text-xl",
+              )}
+            >
+              {rec.crop.name}
             </h3>
-            {primary && <Pill tone="harvest" icon={TrendingUp}>Top opportunity</Pill>}
+            {primary && (
+              <Pill tone="harvest" icon={TrendingUp}>
+                Top opportunity
+              </Pill>
+            )}
           </div>
 
           <div className="mt-3 flex flex-wrap gap-2">
-            <Pill tone="primary">{rec.demandLevel} demand</Pill>
-            <Pill tone="success">Weather: {rec.weatherLabel}</Pill>
-            <RiskBadge risk={rec.risk} />
+            <Pill tone="primary">{rec.demand_level} demand</Pill>
+            <Pill tone="success">Weather: {rec.weather_tag}</Pill>
+            <RiskBadge risk={rec.risk_tag} />
           </div>
 
-          {primary && <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted-foreground">{rec.explanation}</p>}
+          {/* `summary` is the API's own one-line rationale for this ranking. */}
+          {primary && (
+            <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted-foreground">
+              {rec.summary}
+            </p>
+          )}
         </div>
 
-        <OpportunityScore value={rec.opportunityScore} size={primary ? 132 : 96} />
+        <OpportunityScore value={rec.opportunity_pct} size={primary ? 132 : 96} />
       </div>
 
       <dl className={cn("mt-5 grid gap-3", primary ? "sm:grid-cols-4" : "sm:grid-cols-3")}>
-        <Metric label="Expected demand" value={`${rec.expectedDemand.toLocaleString("en-IN")} q`} hint={rec.demandChangeLabel} />
-        <Metric label="Expected supply" value={`${rec.expectedSupply.toLocaleString("en-IN")} q`} />
+        <Metric label="Expected demand" value={formatQty(rec.expected_demand_qty, unit)} />
+        <Metric label="Expected supply" value={formatQty(rec.expected_supply_qty, unit)} />
         <Metric
           label="Demand gap"
-          value={`${rec.demandGap > 0 ? "+" : ""}${rec.demandGap.toLocaleString("en-IN")} q`}
-          tone={rec.demandGap > 0 ? "positive" : "negative"}
-          hint={rec.demandGap > 0 ? "Positive gap = opportunity" : "Negative gap = oversupply risk"}
+          value={formatSignedQty(gap, unit)}
+          tone={gap === null ? "neutral" : gap > 0 ? "positive" : "negative"}
+          {...(gap === null
+            ? {}
+            : { hint: gap > 0 ? "Positive gap = opportunity" : "Negative gap = oversupply risk" })}
         />
-        {primary && <Metric label="Weather suitability" value={`${rec.weatherSuitability}/100`} />}
+        {primary && (
+          <Metric label="Weather suitability" value={`${rec.weather_suitability_score}/100`} />
+        )}
       </dl>
 
       <div className="mt-5 grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-        <ConfidenceIndicator value={rec.confidence} compact />
+        <ConfidenceIndicator value={rec.confidence_pct} compact />
         <div className="flex flex-col gap-2 sm:flex-row">
           <Link
             to="/crop/$cropId"
-            params={{ cropId: rec.id }}
+            params={{ cropId: String(rec.crop.id) }}
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-dark active:bg-primary-dark"
           >
             View crop plan <ArrowRight className="h-4 w-4" aria-hidden />
@@ -78,7 +98,7 @@ export function CropRecommendationCard({
             onClick={() => onWhy(rec)}
             className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
           >
-            <HelpCircle className="h-4 w-4" aria-hidden /> Why {rec.crop}?
+            <HelpCircle className="h-4 w-4" aria-hidden /> Why {rec.crop.name}?
           </button>
         </div>
       </div>

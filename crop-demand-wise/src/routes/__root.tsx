@@ -130,10 +130,13 @@ function SiteFooter() {
   return (
     <footer className="mt-16 border-t border-border bg-card">
       <div className="mx-auto max-w-7xl px-4 py-8 text-sm text-muted-foreground md:px-6">
-        <p className="font-semibold text-foreground">KhetiSetu — From Crop Decisions to Smart Supply.</p>
+        <p className="font-semibold text-foreground">
+          KhetiSetu — From Crop Decisions to Smart Supply.
+        </p>
         <p className="mt-2 max-w-3xl">
-          Prototype demo. All data shown is synthetic and for demonstration only. KhetiSetu provides
-          decision support — it does not guarantee yield, demand or profitability. Final crop and input
+          Live data from the KhetiSetu API. Rows the API reports as synthetic backfill, and guidance
+          it reports as unverified, are labelled where they appear. KhetiSetu provides decision
+          support — it does not guarantee yield, demand or profitability. Final crop and input
           decisions should follow local agricultural advisories.
         </p>
       </div>

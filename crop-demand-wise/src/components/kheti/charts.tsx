@@ -3,14 +3,27 @@ import {
   BarChart,
   CartesianGrid,
   Legend,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import type { DemandSupplyRow } from "@/lib/mockData";
+
+/**
+ * Built from the API's `crop_market_data` figures carried on each recommendation
+ * item (`expected_demand_qty` / `expected_supply_qty` / `demand_gap`).
+ *
+ * There is no demand *history* chart here: the API exposes only the latest market
+ * row per crop (`get_market_data` … ORDER BY year DESC LIMIT 1), so a multi-season
+ * trend line would have to be invented. It needs a backend endpoint returning the
+ * `crop_market_data` series before it can come back.
+ */
+export interface DemandSupplyRow {
+  crop: string;
+  demand: number;
+  supply: number;
+  gap: number;
+}
 
 const axisProps = {
   stroke: "var(--color-muted-foreground)",
@@ -29,19 +42,39 @@ const tooltipStyle = {
   },
 } as const;
 
-export function DemandSupplyChart({ data }: { data: DemandSupplyRow[] }) {
+function compactTick(value: number): string {
+  if (Math.abs(value) >= 1_000_000) return `${Math.round(value / 100_000) / 10}M`;
+  if (Math.abs(value) >= 1000) return `${Math.round(value / 1000)}k`;
+  return String(value);
+}
+
+export function DemandSupplyChart({ data, unit }: { data: DemandSupplyRow[]; unit: string }) {
   return (
     <div>
-      <div className="h-72 w-full" role="img" aria-label={demandSupplyDescription(data)}>
+      <div className="h-72 w-full" role="img" aria-label={describe(data, unit)}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }} barGap={6}>
+          <BarChart data={data} margin={{ top: 8, right: 8, left: -4, bottom: 0 }} barGap={6}>
             <CartesianGrid vertical={false} stroke="var(--color-border)" />
             <XAxis dataKey="crop" {...axisProps} />
-            <YAxis {...axisProps} tickFormatter={(v: number) => `${v / 1000}k`} />
-            <Tooltip {...tooltipStyle} formatter={(v: number, n: string) => [`${v.toLocaleString("en-IN")} q`, n]} cursor={{ fill: "var(--color-muted)" }} />
+            <YAxis {...axisProps} tickFormatter={compactTick} />
+            <Tooltip
+              {...tooltipStyle}
+              formatter={(v: number, n: string) => [`${v.toLocaleString("en-IN")} ${unit}`, n]}
+              cursor={{ fill: "var(--color-muted)" }}
+            />
             <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
-            <Bar dataKey="demand" name="Expected demand" fill="var(--color-primary)" radius={[6, 6, 0, 0]} />
-            <Bar dataKey="supply" name="Expected supply" fill="var(--color-harvest)" radius={[6, 6, 0, 0]} />
+            <Bar
+              dataKey="demand"
+              name="Expected demand"
+              fill="var(--color-primary)"
+              radius={[6, 6, 0, 0]}
+            />
+            <Bar
+              dataKey="supply"
+              name="Expected supply"
+              fill="var(--color-harvest)"
+              radius={[6, 6, 0, 0]}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -49,11 +82,18 @@ export function DemandSupplyChart({ data }: { data: DemandSupplyRow[] }) {
         {data.map((row) => {
           const positive = row.gap > 0;
           return (
-            <li key={row.crop} className="flex items-center justify-between rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm">
+            <li
+              key={row.crop}
+              className="flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm"
+            >
               <span className="font-medium text-foreground">{row.crop}</span>
-              <span className={positive ? "font-semibold text-success" : "font-semibold text-destructive"}>
+              <span
+                className={
+                  positive ? "font-semibold text-success" : "font-semibold text-destructive"
+                }
+              >
                 {positive ? "▲ Opportunity" : "▼ Possible oversupply"} {positive ? "+" : ""}
-                {row.gap.toLocaleString("en-IN")} q
+                {row.gap.toLocaleString("en-IN")} {unit}
               </span>
             </li>
           );
@@ -63,66 +103,14 @@ export function DemandSupplyChart({ data }: { data: DemandSupplyRow[] }) {
   );
 }
 
-function demandSupplyDescription(data: DemandSupplyRow[]) {
+function describe(data: DemandSupplyRow[], unit: string): string {
   return (
     "Bar chart comparing expected demand and expected supply. " +
     data
-      .map((d) => `${d.crop}: demand ${d.demand} quintals, supply ${d.supply} quintals, gap ${d.gap}`)
+      .map(
+        (d) =>
+          `${d.crop}: demand ${d.demand} ${unit}, supply ${d.supply} ${unit}, gap ${d.gap} ${unit}`,
+      )
       .join(". ")
-  );
-}
-
-export function DemandTrendChart({
-  data,
-}: {
-  data: { season: string; demand: number; projected?: boolean }[];
-}) {
-  const historical = data.map((d) => ({ ...d, historical: d.projected ? null : d.demand }));
-  const lastHistoricalIndex = data.findIndex((d) => d.projected) - 1;
-  const merged = historical.map((d, i) => ({
-    ...d,
-    projectedLine: d.projected || i === lastHistoricalIndex ? d.demand : null,
-  }));
-
-  return (
-    <div>
-      <div
-        className="h-64 w-full"
-        role="img"
-        aria-label={`Line chart of demand across seasons. ${data.map((d) => `${d.season}: ${d.demand} quintals${d.projected ? " (projected)" : ""}`).join(". ")}`}
-      >
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={merged} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
-            <CartesianGrid vertical={false} stroke="var(--color-border)" />
-            <XAxis dataKey="season" {...axisProps} />
-            <YAxis {...axisProps} tickFormatter={(v: number) => `${v / 1000}k`} />
-            <Tooltip {...tooltipStyle} formatter={(v: number) => [`${v.toLocaleString("en-IN")} q`, "Demand"]} />
-            <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
-            <Line
-              type="monotone"
-              dataKey="historical"
-              name="Historical demand"
-              stroke="var(--color-primary)"
-              strokeWidth={3}
-              dot={{ r: 4 }}
-              connectNulls
-            />
-            <Line
-              type="monotone"
-              dataKey="projectedLine"
-              name="Projected (demo)"
-              stroke="var(--color-harvest)"
-              strokeWidth={3}
-              strokeDasharray="6 6"
-              dot={{ r: 4 }}
-              connectNulls
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-      <p className="mt-2 text-xs text-muted-foreground">
-        Solid line = recorded historical demand. Dashed line = projected demo value, not an observed fact.
-      </p>
-    </div>
   );
 }

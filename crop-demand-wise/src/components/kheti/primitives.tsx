@@ -1,20 +1,28 @@
 import type { ReactNode } from "react";
 import {
   AlertTriangle,
-  BarChart3,
   BookOpen,
   Check,
   CircleAlert,
-  CloudSun,
   Info,
+  KeyRound,
+  Loader2,
   ShieldCheck,
 } from "lucide-react";
-import type { RiskLevel, SourceRef } from "@/lib/mockData";
+
+import { ApiError } from "@/services/api";
+import type { RiskLevel } from "@/services/api";
 import { cn } from "@/lib/utils";
 
-/* ---------------- Demo data badge ---------------- */
+/* ---------------- Badges ---------------- */
 
-export function DemoDataBadge({ label = "Demo data", className }: { label?: string; className?: string }) {
+export function DemoDataBadge({
+  label = "Demo data",
+  className,
+}: {
+  label?: string;
+  className?: string;
+}) {
   return (
     <span
       className={cn(
@@ -23,6 +31,19 @@ export function DemoDataBadge({ label = "Demo data", className }: { label?: stri
       )}
     >
       <Info className="h-3 w-3" aria-hidden />
+      {label}
+    </span>
+  );
+}
+
+/**
+ * Shown against anything the API flags as not human-verified —
+ * `agronomic_guidance.is_verified === false` or RAG's `used_placeholder_data`.
+ */
+export function UnverifiedBadge({ label = "Unverified source" }: { label?: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-warning/40 bg-warning/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-warning">
+      <AlertTriangle className="h-3 w-3" aria-hidden />
       {label}
     </span>
   );
@@ -57,17 +78,114 @@ export function Section({
   );
 }
 
+/* ---------------- Async states ---------------- */
+
+export function LoadingState({ label = "Loading…" }: { label?: string }) {
+  return (
+    <div
+      className="flex items-center justify-center gap-3 rounded-lg border border-border bg-muted/40 px-4 py-8 text-sm font-medium text-muted-foreground"
+      role="status"
+    >
+      <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden />
+      {label}
+    </div>
+  );
+}
+
+/**
+ * An empty API response is usually a real state in this system (the batch ML job
+ * hasn't run, no forecast rows exist yet), so it gets an explanation rather than
+ * a blank panel.
+ */
+export function EmptyState({
+  title,
+  detail,
+  action,
+}: {
+  title: string;
+  detail?: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-dashed border-border bg-muted/30 px-4 py-8 text-center">
+      <p className="text-sm font-semibold text-foreground">{title}</p>
+      {detail && <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">{detail}</p>}
+      {action && <div className="mt-4">{action}</div>}
+    </div>
+  );
+}
+
+/**
+ * 401/403 gets its own panel: the fix is a configuration change, not a retry.
+ * Everything else falls through to the generic error message.
+ */
+export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
+  if (error instanceof ApiError && error.isAuthError) {
+    return (
+      <div className="rounded-lg border border-warning/40 bg-warning/5 p-4">
+        <p className="flex items-start gap-2 text-sm font-semibold text-foreground">
+          <KeyRound className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
+          This endpoint needs an API token
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">The API replied: {error.message}</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Set <code className="rounded bg-muted px-1 py-0.5 text-xs">VITE_API_TOKEN</code> in this
+          app's <code className="rounded bg-muted px-1 py-0.5 text-xs">.env</code> to a token for an
+          account with the required role, then restart the dev server.
+        </p>
+      </div>
+    );
+  }
+
+  const message = error instanceof Error ? error.message : "Something went wrong.";
+  return (
+    <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4">
+      <p className="flex items-start gap-2 text-sm font-semibold text-foreground">
+        <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden />
+        Couldn't load this from the API
+      </p>
+      <p className="mt-2 text-sm text-muted-foreground">{message}</p>
+      {onRetry && (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="mt-3 rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground hover:bg-muted"
+        >
+          Try again
+        </button>
+      )}
+    </div>
+  );
+}
+
 /* ---------------- Risk badge ---------------- */
 
 export function RiskBadge({ risk }: { risk: RiskLevel }) {
   const map = {
-    Low: { cls: "border-success/40 bg-success/10 text-success", Icon: ShieldCheck, text: "Low risk" },
-    Medium: { cls: "border-warning/40 bg-warning/10 text-warning", Icon: AlertTriangle, text: "Medium risk" },
-    High: { cls: "border-destructive/40 bg-destructive/10 text-destructive", Icon: CircleAlert, text: "High risk" },
+    Low: {
+      cls: "border-success/40 bg-success/10 text-success",
+      Icon: ShieldCheck,
+      text: "Low risk",
+    },
+    Medium: {
+      cls: "border-warning/40 bg-warning/10 text-warning",
+      Icon: AlertTriangle,
+      text: "Medium risk",
+    },
+    High: {
+      cls: "border-destructive/40 bg-destructive/10 text-destructive",
+      Icon: CircleAlert,
+      text: "High risk",
+    },
   } as const;
   const { cls, Icon, text } = map[risk];
   return (
-    <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold", cls)}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold",
+        cls,
+      )}
+    >
       <Icon className="h-3.5 w-3.5" aria-hidden />
       {text}
     </span>
@@ -91,7 +209,12 @@ export function Pill({
     success: "border-success/30 bg-success/10 text-success",
   } as const;
   return (
-    <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold", tones[tone])}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold",
+        tones[tone],
+      )}
+    >
       {Icon && <Icon className="h-3.5 w-3.5" aria-hidden />}
       {children}
     </span>
@@ -100,7 +223,20 @@ export function Pill({
 
 /* ---------------- Confidence ---------------- */
 
-export function ConfidenceIndicator({ value, compact = false }: { value: number; compact?: boolean }) {
+/**
+ * `basis` is the API's own `confidence_basis` string — it names the data that
+ * produced the number (years of ACTUAL history, weather availability, calendar
+ * coverage), so it is shown verbatim when available.
+ */
+export function ConfidenceIndicator({
+  value,
+  basis,
+  compact = false,
+}: {
+  value: number;
+  basis?: string | undefined;
+  compact?: boolean | undefined;
+}) {
   return (
     <div>
       <div className="flex items-baseline justify-between gap-2">
@@ -115,13 +251,19 @@ export function ConfidenceIndicator({ value, compact = false }: { value: number;
         aria-valuemax={100}
         aria-label={`Confidence ${value} percent`}
       >
-        <div className="h-full rounded-full bg-primary-light transition-[width] duration-500" style={{ width: `${value}%` }} />
+        <div
+          className="h-full rounded-full bg-primary-light transition-[width] duration-500"
+          style={{ width: `${value}%` }}
+        />
       </div>
       {!compact && (
-        <p className="mt-2 text-xs text-muted-foreground">
-          Confidence reflects historical data coverage, weather availability and seasonal consistency. It is
-          not a probability of profit.
-        </p>
+        <>
+          {basis && <p className="mt-2 text-xs font-medium text-foreground">Based on: {basis}</p>}
+          <p className="mt-1 text-xs text-muted-foreground">
+            Confidence reflects historical data coverage, weather availability and seasonal
+            consistency. It is not a probability of profit.
+          </p>
+        </>
       )}
     </div>
   );
@@ -133,13 +275,33 @@ export function OpportunityScore({ value, size = 132 }: { value: number; size?: 
   const stroke = size >= 120 ? 11 : 9;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
-  const label = value >= 80 ? "Very high opportunity" : value >= 70 ? "High opportunity" : value >= 55 ? "Moderate opportunity" : "Low opportunity";
+  const label =
+    value >= 80
+      ? "Very high opportunity"
+      : value >= 70
+        ? "High opportunity"
+        : value >= 55
+          ? "Moderate opportunity"
+          : "Low opportunity";
 
   return (
     <figure className="flex flex-col items-center gap-2">
       <div className="relative" style={{ width: size, height: size }}>
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={`Opportunity score ${value} out of 100. ${label}.`}>
-          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--color-muted)" strokeWidth={stroke} />
+        <svg
+          width={size}
+          height={size}
+          viewBox={`0 0 ${size} ${size}`}
+          role="img"
+          aria-label={`Opportunity score ${value} out of 100. ${label}.`}
+        >
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            fill="none"
+            stroke="var(--color-muted)"
+            strokeWidth={stroke}
+          />
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -155,7 +317,12 @@ export function OpportunityScore({ value, size = 132 }: { value: number; size?: 
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className={cn("font-bold leading-none text-foreground", size >= 120 ? "text-3xl" : "text-2xl")}>
+          <span
+            className={cn(
+              "font-bold leading-none text-foreground",
+              size >= 120 ? "text-3xl" : "text-2xl",
+            )}
+          >
             {value}%
           </span>
           {size >= 120 && (
@@ -200,22 +367,35 @@ export function Metric({
 
 /* ---------------- Sources ---------------- */
 
-export function SourceList({ sources }: { sources: SourceRef[] }) {
-  const icons = { book: BookOpen, chart: BarChart3, cloud: CloudSun };
+/**
+ * Normalized shape: the API returns sources in two flavours — `SourceRef`
+ * (crop detail) and `RagSourceRef` (RAG) — so callers map into this.
+ */
+export interface SourceDisplay {
+  id: number;
+  title: string;
+  detail: string | null;
+}
+
+export function SourceList({ sources }: { sources: SourceDisplay[] }) {
+  if (sources.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        No source documents are linked to this answer yet.
+      </p>
+    );
+  }
   return (
     <ul className="grid gap-3 sm:grid-cols-3">
-      {sources.map((s) => {
-        const Icon = icons[s.icon];
-        return (
-          <li key={s.category} className="rounded-lg border border-border bg-muted/50 p-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <Icon className="h-4 w-4 text-primary" aria-hidden />
-              {s.category}
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">{s.source}</p>
-          </li>
-        );
-      })}
+      {sources.map((s) => (
+        <li key={s.id} className="rounded-lg border border-border bg-muted/50 p-3">
+          <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+            <BookOpen className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+            <span className="min-w-0 break-words">{s.title}</span>
+          </div>
+          {s.detail && <p className="mt-1 text-xs text-muted-foreground">{s.detail}</p>}
+        </li>
+      ))}
     </ul>
   );
 }
