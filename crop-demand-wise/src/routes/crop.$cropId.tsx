@@ -9,6 +9,7 @@ import {
   Thermometer,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Trans, useTranslation } from "react-i18next";
 
 import { useCropDetail, useCropIntentMutation } from "@/services/queries";
 import { useFarm } from "@/lib/farm-store";
@@ -20,6 +21,8 @@ import {
   monthRangeLabel,
   weeksRangeLabel,
 } from "@/lib/format";
+import { tFor } from "@/lib/i18n";
+import { readLanguage } from "@/lib/i18n/language";
 import {
   ConfidenceIndicator,
   DecisionTrace,
@@ -37,24 +40,24 @@ import {
 } from "@/components/kheti/primitives";
 
 export const Route = createFileRoute("/crop/$cropId")({
-  head: () => ({
-    meta: [
-      { title: "Crop plan | KhetiSetu" },
-      {
-        name: "description",
-        content:
-          "Demand outlook, weather suitability, indicative inputs, risk and confidence for a crop in your district.",
-      },
-      { property: "og:title", content: "Crop plan | KhetiSetu" },
-      { property: "og:description", content: "Explainable crop decision support." },
-      { property: "og:type", content: "article" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () => {
+    const t = tFor(readLanguage());
+    return {
+      meta: [
+        { title: t("cropDetail.meta.title") },
+        { name: "description", content: t("cropDetail.meta.description") },
+        { property: "og:title", content: t("cropDetail.meta.ogTitle") },
+        { property: "og:description", content: t("cropDetail.meta.ogDescription") },
+        { property: "og:type", content: "article" },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+    };
+  },
   component: CropDetails,
 });
 
 function CropDetails() {
+  const { t } = useTranslation();
   const { cropId } = Route.useParams();
   const { farmer, recommendation } = useFarm();
   const [showSources, setShowSources] = useState(false);
@@ -79,14 +82,14 @@ function CropDetails() {
     return (
       <div className="mx-auto max-w-3xl px-4 py-12 md:px-6">
         <EmptyState
-          title="Pick your district first"
-          detail="Crop details are district-specific — the API needs a district to look up market and weather data."
+          title={t("cropDetail.needDistrictTitle")}
+          detail={t("cropDetail.needDistrictDetail")}
           action={
             <Link
               to="/farmer"
               className="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-dark"
             >
-              Analyse my farm
+              {t("common.analyseMyFarm")}
             </Link>
           }
         />
@@ -97,7 +100,7 @@ function CropDetails() {
   if (detail.isPending) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-12 md:px-6">
-        <LoadingState label="Loading crop plan…" />
+        <LoadingState label={t("cropDetail.loading")} />
       </div>
     );
   }
@@ -110,7 +113,7 @@ function CropDetails() {
           to="/recommendations"
           className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
         >
-          <ArrowLeft className="h-4 w-4" aria-hidden /> Back to recommendations
+          <ArrowLeft className="h-4 w-4" aria-hidden /> {t("common.backToRecommendations")}
         </Link>
       </div>
     );
@@ -122,16 +125,16 @@ function CropDetails() {
   const matchingRec = recommendation?.recommendations.find((r) => r.crop.id === crop.crop.id);
   const unit = matchingRec?.unit ?? "";
   const npk = [
-    { label: "Nitrogen (N)", value: guidance.nitrogen_kg_ha },
-    { label: "Phosphorus (P)", value: guidance.phosphorus_kg_ha },
-    { label: "Potassium (K)", value: guidance.potassium_kg_ha },
+    { label: t("cropDetail.guidance.nitrogen"), value: guidance.nitrogen_kg_ha },
+    { label: t("cropDetail.guidance.phosphorus"), value: guidance.phosphorus_kg_ha },
+    { label: t("cropDetail.guidance.potassium"), value: guidance.potassium_kg_ha },
   ].filter((row) => row.value !== null);
 
   function saveIntent() {
     const seasonId = recommendation?.season_id;
     if (seasonId === null || seasonId === undefined) {
-      toast.error("Season unknown", {
-        description: "Run the farm analysis first so KhetiSetu knows which season this is.",
+      toast.error(t("cropDetail.intent.seasonUnknownTitle"), {
+        description: t("cropDetail.intent.seasonUnknownDetail"),
       });
       return;
     }
@@ -147,11 +150,11 @@ function CropDetails() {
       {
         onSuccess: (result) => {
           setSavedIntentId(result.id);
-          toast.success("Saved", {
-            description: `Recorded that you plan to grow ${crop.crop.name}.`,
+          toast.success(t("cropDetail.intent.savedToastTitle"), {
+            description: t("cropDetail.intent.savedToastDetail", { crop: crop.crop.name }),
           });
         },
-        onError: () => toast.error("Could not save your crop plan"),
+        onError: () => toast.error(t("cropDetail.intent.errorTitle")),
       },
     );
   }
@@ -162,15 +165,23 @@ function CropDetails() {
         to="/recommendations"
         className="inline-flex items-center gap-2 text-sm font-semibold text-primary underline-offset-4 hover:underline"
       >
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Back to recommendations
+        <ArrowLeft className="h-4 w-4" aria-hidden /> {t("common.backToRecommendations")}
       </Link>
 
       <header className="surface-card mt-4 grid gap-5 p-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:p-7">
         <div className="min-w-0">
           <h1 className="text-3xl font-extrabold text-foreground">{crop.crop.name}</h1>
           <div className="mt-3 flex flex-wrap gap-2">
-            {crop.tags["demand"] && <Pill tone="primary">{crop.tags["demand"]} DEMAND</Pill>}
-            {crop.tags["weather"] && <Pill tone="success">{crop.tags["weather"]} WEATHER</Pill>}
+            {crop.tags["demand"] && (
+              <Pill tone="primary">
+                {t("cropDetail.demandTag", { level: crop.tags["demand"] })}
+              </Pill>
+            )}
+            {crop.tags["weather"] && (
+              <Pill tone="success">
+                {t("cropDetail.weatherTag", { tag: crop.tags["weather"] })}
+              </Pill>
+            )}
             <RiskBadge risk={crop.risk.level} />
           </div>
         </div>
@@ -179,8 +190,8 @@ function CropDetails() {
 
       <div className="mt-6 space-y-6">
         <Section
-          title={`Why ${crop.crop.name}?`}
-          description="How KhetiSetu reached this recommendation."
+          title={t("cropDetail.why.title", { crop: crop.crop.name })}
+          description={t("cropDetail.why.description")}
         >
           <DecisionTrace
             items={crop.why.map((factor) => ({ title: factor.factor, detail: factor.detail }))}
@@ -188,27 +199,27 @@ function CropDetails() {
         </Section>
 
         <Section
-          title="Demand outlook"
-          description="Latest recorded demand and supply for this crop in your district."
+          title={t("cropDetail.demandOutlook.title")}
+          description={t("cropDetail.demandOutlook.description")}
         >
           {outlook.expected_demand_qty === null && outlook.expected_supply_qty === null ? (
             <EmptyState
-              title="No market figures recorded"
-              detail="The API has no demand/supply row for this district and crop yet."
+              title={t("cropDetail.demandOutlook.emptyTitle")}
+              detail={t("cropDetail.demandOutlook.emptyDetail")}
             />
           ) : (
             <dl className="grid gap-3 sm:grid-cols-3">
               <Metric
-                label="Expected demand"
-                value={formatQty(outlook.expected_demand_qty, unit)}
+                label={t("metrics.expectedDemand")}
+                value={formatQty(t, outlook.expected_demand_qty, unit)}
               />
               <Metric
-                label="Expected supply"
-                value={formatQty(outlook.expected_supply_qty, unit)}
+                label={t("metrics.expectedSupply")}
+                value={formatQty(t, outlook.expected_supply_qty, unit)}
               />
               <Metric
-                label="Demand gap"
-                value={formatSignedQty(outlook.demand_gap, unit)}
+                label={t("metrics.demandGap")}
+                value={formatSignedQty(t, outlook.demand_gap, unit)}
                 tone={
                   outlook.demand_gap === null
                     ? "neutral"
@@ -221,11 +232,14 @@ function CropDetails() {
           )}
         </Section>
 
-        <Section title="Weather suitability" description="Averaged from recorded weather history.">
+        <Section
+          title={t("cropDetail.weather.title")}
+          description={t("cropDetail.weather.description")}
+        >
           <dl className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-lg border border-border bg-muted/50 p-3">
               <dt className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <CloudSun className="h-4 w-4 text-primary" aria-hidden /> Rainfall
+                <CloudSun className="h-4 w-4 text-primary" aria-hidden /> {t("weather.rainfall")}
               </dt>
               <dd className="mt-1 text-lg font-bold text-foreground">
                 {crop.weather_suitability.rainfall}
@@ -233,7 +247,8 @@ function CropDetails() {
             </div>
             <div className="rounded-lg border border-border bg-muted/50 p-3">
               <dt className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <Thermometer className="h-4 w-4 text-primary" aria-hidden /> Temperature
+                <Thermometer className="h-4 w-4 text-primary" aria-hidden />{" "}
+                {t("weather.temperature")}
               </dt>
               <dd className="mt-1 text-lg font-bold text-foreground">
                 {formatTemp(crop.weather_suitability.temperature_c)}
@@ -241,7 +256,7 @@ function CropDetails() {
             </div>
             <div className="rounded-lg border border-border bg-muted/50 p-3">
               <dt className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <Droplets className="h-4 w-4 text-primary" aria-hidden /> Humidity
+                <Droplets className="h-4 w-4 text-primary" aria-hidden /> {t("weather.humidity")}
               </dt>
               <dd className="mt-1 text-lg font-bold text-foreground">
                 {formatPct(crop.weather_suitability.humidity_pct)}
@@ -249,26 +264,38 @@ function CropDetails() {
             </div>
           </dl>
           <p className="mt-3 text-sm text-muted-foreground">
-            Overall weather suitability for {crop.crop.name}:{" "}
-            <strong className="text-foreground">{crop.weather_suitability.score}/100</strong>.
+            <Trans
+              i18nKey="cropDetail.weather.overall"
+              values={{ crop: crop.crop.name, score: crop.weather_suitability.score }}
+              components={{ score: <strong className="text-foreground" /> }}
+            />
           </p>
           <Link
             to="/whatif"
             className="mt-4 inline-flex w-full items-center justify-center rounded-lg border border-primary/40 bg-primary/5 px-4 py-3 text-sm font-semibold text-primary hover:bg-primary/10 sm:w-auto"
           >
-            Test weather scenario
+            {t("common.testWeatherScenario")}
           </Link>
         </Section>
 
-        <Section title="Crop season" description="From the crop calendar for your district.">
+        <Section
+          title={t("cropDetail.season.title")}
+          description={t("cropDetail.season.description")}
+        >
           <ol className="grid gap-3 sm:grid-cols-3">
             {[
-              { label: "Sowing months", value: monthRangeLabel(crop.crop_season.sowing_months) },
               {
-                label: "Growing period",
-                value: weeksRangeLabel(crop.crop_season.growing_period_weeks),
+                label: t("cropDetail.season.sowingMonths"),
+                value: monthRangeLabel(t, crop.crop_season.sowing_months),
               },
-              { label: "Harvest window", value: monthRangeLabel(crop.crop_season.harvest_months) },
+              {
+                label: t("cropDetail.season.growingPeriod"),
+                value: weeksRangeLabel(t, crop.crop_season.growing_period_weeks),
+              },
+              {
+                label: t("cropDetail.season.harvestWindow"),
+                value: monthRangeLabel(t, crop.crop_season.harvest_months),
+              },
             ].map((item, i) => (
               <li key={item.label} className="rounded-lg border border-border bg-muted/50 p-3">
                 <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
@@ -282,14 +309,14 @@ function CropDetails() {
         </Section>
 
         <Section
-          title="Indicative agronomic guidance"
-          description="Nutrient rates recorded for this crop."
+          title={t("cropDetail.guidance.title")}
+          description={t("cropDetail.guidance.description")}
           action={guidance.is_verified ? undefined : <UnverifiedBadge />}
         >
           {npk.length === 0 ? (
             <EmptyState
-              title="No nutrient guidance recorded"
-              detail={guidance.warning ?? "The API has no fertilizer recommendation for this crop."}
+              title={t("cropDetail.guidance.emptyTitle")}
+              detail={guidance.warning ?? t("cropDetail.guidance.emptyDetail")}
             />
           ) : (
             <>
@@ -297,27 +324,29 @@ function CropDetails() {
                 {npk.map((row) => (
                   <li key={row.label} className="rounded-lg border border-border bg-muted/50 p-4">
                     <p className="text-base font-bold text-foreground">{row.label}</p>
-                    <p className="mt-1 text-sm font-semibold text-primary">{row.value} kg / ha</p>
+                    <p className="mt-1 text-sm font-semibold text-primary">
+                      {t("cropDetail.guidance.rate", { value: row.value })}
+                    </p>
                   </li>
                 ))}
               </ul>
               {guidance.application_stage && (
                 <p className="mt-3 text-sm text-muted-foreground">
-                  Application stage:{" "}
-                  <strong className="text-foreground">{guidance.application_stage}</strong>
+                  <Trans
+                    i18nKey="cropDetail.guidance.applicationStage"
+                    values={{ stage: guidance.application_stage }}
+                    components={{ stage: <strong className="text-foreground" /> }}
+                  />
                 </p>
               )}
             </>
           )}
           <div className="mt-4">
-            <Disclaimer>
-              {guidance.warning ??
-                "Final fertilizer recommendations should follow local agricultural advisories / soil-test recommendations."}
-            </Disclaimer>
+            <Disclaimer>{guidance.warning ?? t("cropDetail.guidance.disclaimer")}</Disclaimer>
           </div>
         </Section>
 
-        <Section title="Risk" description="What could go differently this season.">
+        <Section title={t("cropDetail.risk.title")} description={t("cropDetail.risk.description")}>
           <div className="flex flex-wrap items-center gap-2">
             <RiskBadge risk={crop.risk.level} />
           </div>
@@ -334,13 +363,16 @@ function CropDetails() {
           </ul>
         </Section>
 
-        <Section title="Confidence" description="How sure the system is about this recommendation.">
+        <Section
+          title={t("cropDetail.confidence.title")}
+          description={t("cropDetail.confidence.description")}
+        >
           <ConfidenceIndicator value={crop.confidence_pct} basis={matchingRec?.confidence_basis} />
         </Section>
 
         <Section
-          title="Sources"
-          description="Documents linked to the guidance above."
+          title={t("cropDetail.sources.title")}
+          description={t("cropDetail.sources.description")}
           action={
             <button
               type="button"
@@ -348,7 +380,7 @@ function CropDetails() {
               aria-expanded={showSources}
               className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground hover:bg-muted"
             >
-              {showSources ? "Hide sources" : "View sources"}
+              {showSources ? t("cropDetail.sources.hide") : t("cropDetail.sources.show")}
             </button>
           }
         >
@@ -356,27 +388,27 @@ function CropDetails() {
             <SourceList
               sources={crop.sources.map((source) => ({
                 id: source.id,
-                title: source.organization ?? `Source #${source.id}`,
+                title: source.organization ?? t("sources.fallback", { id: source.id }),
                 detail: source.source_type,
               }))}
             />
           ) : (
             <p className="text-sm text-muted-foreground">
               {crop.sources.length === 0
-                ? "No source document is linked to this crop's guidance yet."
-                : `${crop.sources.length} linked source${crop.sources.length === 1 ? "" : "s"}.`}
+                ? t("cropDetail.sources.none")
+                : t("cropDetail.sources.count", { count: crop.sources.length })}
             </p>
           )}
         </Section>
 
         <Section
-          title="Planning to grow this?"
-          description="Records your intent so agri-businesses can plan input supply. Aggregated only — never shown per farmer."
+          title={t("cropDetail.intent.title")}
+          description={t("cropDetail.intent.description")}
         >
           {savedIntentId !== null ? (
             <p className="flex items-center gap-2 rounded-lg border border-success/40 bg-success/5 p-3 text-sm font-semibold text-success">
               <CheckCircle2 className="h-4 w-4" aria-hidden />
-              Saved — your {crop.crop.name} plan was recorded.
+              {t("cropDetail.intent.saved", { crop: crop.crop.name })}
             </p>
           ) : (
             <button
@@ -385,7 +417,9 @@ function CropDetails() {
               disabled={createIntent.isPending}
               className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-dark disabled:bg-muted disabled:text-muted-foreground sm:w-auto"
             >
-              {createIntent.isPending ? "Saving…" : `I'm growing ${crop.crop.name}`}
+              {createIntent.isPending
+                ? t("cropDetail.intent.saving")
+                : t("cropDetail.intent.cta", { crop: crop.crop.name })}
             </button>
           )}
         </Section>

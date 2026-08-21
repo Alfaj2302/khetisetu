@@ -8,6 +8,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import type { TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
 
 /**
  * Built from the API's `crop_market_data` figures carried on each recommendation
@@ -49,9 +51,11 @@ function compactTick(value: number): string {
 }
 
 export function DemandSupplyChart({ data, unit }: { data: DemandSupplyRow[]; unit: string }) {
+  const { t } = useTranslation();
+
   return (
     <div>
-      <div className="h-72 w-full" role="img" aria-label={describe(data, unit)}>
+      <div className="h-72 w-full" role="img" aria-label={describe(t, data, unit)}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 8, right: 8, left: -4, bottom: 0 }} barGap={6}>
             <CartesianGrid vertical={false} stroke="var(--color-border)" />
@@ -59,19 +63,22 @@ export function DemandSupplyChart({ data, unit }: { data: DemandSupplyRow[]; uni
             <YAxis {...axisProps} tickFormatter={compactTick} />
             <Tooltip
               {...tooltipStyle}
-              formatter={(v: number, n: string) => [`${v.toLocaleString("en-IN")} ${unit}`, n]}
+              formatter={(v: number, n: string) => [
+                t("chart.tooltipValue", { value: v.toLocaleString("en-IN"), unit }),
+                n,
+              ]}
               cursor={{ fill: "var(--color-muted)" }}
             />
             <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
             <Bar
               dataKey="demand"
-              name="Expected demand"
+              name={t("metrics.expectedDemand")}
               fill="var(--color-primary)"
               radius={[6, 6, 0, 0]}
             />
             <Bar
               dataKey="supply"
-              name="Expected supply"
+              name={t("metrics.expectedSupply")}
               fill="var(--color-harvest)"
               radius={[6, 6, 0, 0]}
             />
@@ -92,8 +99,9 @@ export function DemandSupplyChart({ data, unit }: { data: DemandSupplyRow[]; uni
                   positive ? "font-semibold text-success" : "font-semibold text-destructive"
                 }
               >
-                {positive ? "▲ Opportunity" : "▼ Possible oversupply"} {positive ? "+" : ""}
-                {row.gap.toLocaleString("en-IN")} {unit}
+                {positive
+                  ? t("chart.gapOpportunity", { gap: row.gap.toLocaleString("en-IN"), unit })
+                  : t("chart.gapOversupply", { gap: row.gap.toLocaleString("en-IN"), unit })}
               </span>
             </li>
           );
@@ -103,14 +111,9 @@ export function DemandSupplyChart({ data, unit }: { data: DemandSupplyRow[]; uni
   );
 }
 
-function describe(data: DemandSupplyRow[], unit: string): string {
-  return (
-    "Bar chart comparing expected demand and expected supply. " +
-    data
-      .map(
-        (d) =>
-          `${d.crop}: demand ${d.demand} ${unit}, supply ${d.supply} ${unit}, gap ${d.gap} ${unit}`,
-      )
-      .join(". ")
+function describe(t: TFunction, data: DemandSupplyRow[], unit: string): string {
+  const rows = data.map((d) =>
+    t("chart.ariaRow", { crop: d.crop, demand: d.demand, supply: d.supply, gap: d.gap, unit }),
   );
+  return [t("chart.aria"), ...rows].join(" ");
 }

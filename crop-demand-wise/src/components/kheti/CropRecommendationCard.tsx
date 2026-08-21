@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, HelpCircle, TrendingUp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import type { RecommendationItem } from "@/services/api";
 import { formatQty, formatSignedQty } from "@/lib/format";
@@ -13,6 +14,7 @@ export function CropRecommendationCard({
   rec: RecommendationItem;
   onWhy: (rec: RecommendationItem) => void;
 }) {
+  const { t } = useTranslation();
   const primary = rec.rank === 1;
   const unit = rec.unit ?? "";
   const gap = rec.demand_gap;
@@ -45,14 +47,14 @@ export function CropRecommendationCard({
             </h3>
             {primary && (
               <Pill tone="harvest" icon={TrendingUp}>
-                Top opportunity
+                {t("cropCard.topOpportunity")}
               </Pill>
             )}
           </div>
 
           <div className="mt-3 flex flex-wrap gap-2">
-            <Pill tone="primary">{rec.demand_level} demand</Pill>
-            <Pill tone="success">Weather: {rec.weather_tag}</Pill>
+            <Pill tone="primary">{t("cropCard.demandLevel", { level: rec.demand_level })}</Pill>
+            <Pill tone="success">{t("cropCard.weatherTag", { tag: rec.weather_tag })}</Pill>
             <RiskBadge risk={rec.risk_tag} />
           </div>
 
@@ -68,18 +70,27 @@ export function CropRecommendationCard({
       </div>
 
       <dl className={cn("mt-5 grid gap-3", primary ? "sm:grid-cols-4" : "sm:grid-cols-3")}>
-        <Metric label="Expected demand" value={formatQty(rec.expected_demand_qty, unit)} />
-        <Metric label="Expected supply" value={formatQty(rec.expected_supply_qty, unit)} />
         <Metric
-          label="Demand gap"
-          value={formatSignedQty(gap, unit)}
+          label={t("metrics.expectedDemand")}
+          value={formatQty(t, rec.expected_demand_qty, unit)}
+        />
+        <Metric
+          label={t("metrics.expectedSupply")}
+          value={formatQty(t, rec.expected_supply_qty, unit)}
+        />
+        <Metric
+          label={t("metrics.demandGap")}
+          value={formatSignedQty(t, gap, unit)}
           tone={gap === null ? "neutral" : gap > 0 ? "positive" : "negative"}
           {...(gap === null
             ? {}
-            : { hint: gap > 0 ? "Positive gap = opportunity" : "Negative gap = oversupply risk" })}
+            : { hint: gap > 0 ? t("cropCard.gapPositive") : t("cropCard.gapNegative") })}
         />
         {primary && (
-          <Metric label="Weather suitability" value={`${rec.weather_suitability_score}/100`} />
+          <Metric
+            label={t("cropCard.weatherSuitability")}
+            value={t("common.score", { value: rec.weather_suitability_score })}
+          />
         )}
       </dl>
 
@@ -91,14 +102,15 @@ export function CropRecommendationCard({
             params={{ cropId: String(rec.crop.id) }}
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-dark active:bg-primary-dark"
           >
-            View crop plan <ArrowRight className="h-4 w-4" aria-hidden />
+            {t("cropCard.viewPlan")} <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
           <button
             type="button"
             onClick={() => onWhy(rec)}
             className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
           >
-            <HelpCircle className="h-4 w-4" aria-hidden /> Why {rec.crop.name}?
+            <HelpCircle className="h-4 w-4" aria-hidden />{" "}
+            {t("cropCard.why", { crop: rec.crop.name })}
           </button>
         </div>
       </div>

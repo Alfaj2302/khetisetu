@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import {
   AlertTriangle,
   BookOpen,
@@ -16,13 +17,8 @@ import { cn } from "@/lib/utils";
 
 /* ---------------- Badges ---------------- */
 
-export function DemoDataBadge({
-  label = "Demo data",
-  className,
-}: {
-  label?: string;
-  className?: string;
-}) {
+export function DemoDataBadge({ label, className }: { label?: string; className?: string }) {
+  const { t } = useTranslation();
   return (
     <span
       className={cn(
@@ -31,7 +27,7 @@ export function DemoDataBadge({
       )}
     >
       <Info className="h-3 w-3" aria-hidden />
-      {label}
+      {label ?? t("badges.demoData")}
     </span>
   );
 }
@@ -40,11 +36,12 @@ export function DemoDataBadge({
  * Shown against anything the API flags as not human-verified —
  * `agronomic_guidance.is_verified === false` or RAG's `used_placeholder_data`.
  */
-export function UnverifiedBadge({ label = "Unverified source" }: { label?: string }) {
+export function UnverifiedBadge({ label }: { label?: string }) {
+  const { t } = useTranslation();
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-warning/40 bg-warning/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-warning">
       <AlertTriangle className="h-3 w-3" aria-hidden />
-      {label}
+      {label ?? t("badges.unverified")}
     </span>
   );
 }
@@ -80,14 +77,15 @@ export function Section({
 
 /* ---------------- Async states ---------------- */
 
-export function LoadingState({ label = "Loading…" }: { label?: string }) {
+export function LoadingState({ label }: { label?: string }) {
+  const { t } = useTranslation();
   return (
     <div
       className="flex items-center justify-center gap-3 rounded-lg border border-border bg-muted/40 px-4 py-8 text-sm font-medium text-muted-foreground"
       role="status"
     >
       <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden />
-      {label}
+      {label ?? t("common.loading")}
     </div>
   );
 }
@@ -120,29 +118,34 @@ export function EmptyState({
  * Everything else falls through to the generic error message.
  */
 export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
+  const { t } = useTranslation();
+
   if (error instanceof ApiError && error.isAuthError) {
     return (
       <div className="rounded-lg border border-warning/40 bg-warning/5 p-4">
         <p className="flex items-start gap-2 text-sm font-semibold text-foreground">
           <KeyRound className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
-          This endpoint needs an API token
+          {t("states.authErrorTitle")}
         </p>
-        <p className="mt-2 text-sm text-muted-foreground">The API replied: {error.message}</p>
         <p className="mt-2 text-sm text-muted-foreground">
-          Set <code className="rounded bg-muted px-1 py-0.5 text-xs">VITE_API_TOKEN</code> in this
-          app's <code className="rounded bg-muted px-1 py-0.5 text-xs">.env</code> to a token for an
-          account with the required role, then restart the dev server.
+          {t("states.authErrorReply", { message: error.message })}
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          <Trans
+            i18nKey="states.authErrorDetail"
+            components={{ code: <code className="rounded bg-muted px-1 py-0.5 text-xs" /> }}
+          />
         </p>
       </div>
     );
   }
 
-  const message = error instanceof Error ? error.message : "Something went wrong.";
+  const message = error instanceof Error ? error.message : t("states.errorGeneric");
   return (
     <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4">
       <p className="flex items-start gap-2 text-sm font-semibold text-foreground">
         <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden />
-        Couldn't load this from the API
+        {t("states.errorTitle")}
       </p>
       <p className="mt-2 text-sm text-muted-foreground">{message}</p>
       {onRetry && (
@@ -151,7 +154,7 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () =>
           onClick={onRetry}
           className="mt-3 rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground hover:bg-muted"
         >
-          Try again
+          {t("common.tryAgain")}
         </button>
       )}
     </div>
@@ -161,24 +164,25 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () =>
 /* ---------------- Risk badge ---------------- */
 
 export function RiskBadge({ risk }: { risk: RiskLevel }) {
+  const { t } = useTranslation();
   const map = {
     Low: {
       cls: "border-success/40 bg-success/10 text-success",
       Icon: ShieldCheck,
-      text: "Low risk",
+      labelKey: "risk.low",
     },
     Medium: {
       cls: "border-warning/40 bg-warning/10 text-warning",
       Icon: AlertTriangle,
-      text: "Medium risk",
+      labelKey: "risk.medium",
     },
     High: {
       cls: "border-destructive/40 bg-destructive/10 text-destructive",
       Icon: CircleAlert,
-      text: "High risk",
+      labelKey: "risk.high",
     },
   } as const;
-  const { cls, Icon, text } = map[risk];
+  const { cls, Icon, labelKey } = map[risk];
   return (
     <span
       className={cn(
@@ -187,7 +191,7 @@ export function RiskBadge({ risk }: { risk: RiskLevel }) {
       )}
     >
       <Icon className="h-3.5 w-3.5" aria-hidden />
-      {text}
+      {t(labelKey)}
     </span>
   );
 }
@@ -237,10 +241,11 @@ export function ConfidenceIndicator({
   basis?: string | undefined;
   compact?: boolean | undefined;
 }) {
+  const { t } = useTranslation();
   return (
     <div>
       <div className="flex items-baseline justify-between gap-2">
-        <span className="text-sm font-medium text-muted-foreground">Confidence</span>
+        <span className="text-sm font-medium text-muted-foreground">{t("confidence.label")}</span>
         <span className="text-sm font-bold text-foreground">{value}%</span>
       </div>
       <div
@@ -249,7 +254,7 @@ export function ConfidenceIndicator({
         aria-valuenow={value}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label={`Confidence ${value} percent`}
+        aria-label={t("confidence.aria", { value })}
       >
         <div
           className="h-full rounded-full bg-primary-light transition-[width] duration-500"
@@ -258,11 +263,12 @@ export function ConfidenceIndicator({
       </div>
       {!compact && (
         <>
-          {basis && <p className="mt-2 text-xs font-medium text-foreground">Based on: {basis}</p>}
-          <p className="mt-1 text-xs text-muted-foreground">
-            Confidence reflects historical data coverage, weather availability and seasonal
-            consistency. It is not a probability of profit.
-          </p>
+          {basis && (
+            <p className="mt-2 text-xs font-medium text-foreground">
+              {t("confidence.basis", { basis })}
+            </p>
+          )}
+          <p className="mt-1 text-xs text-muted-foreground">{t("confidence.note")}</p>
         </>
       )}
     </div>
@@ -272,17 +278,18 @@ export function ConfidenceIndicator({
 /* ---------------- Opportunity score ring ---------------- */
 
 export function OpportunityScore({ value, size = 132 }: { value: number; size?: number }) {
+  const { t } = useTranslation();
   const stroke = size >= 120 ? 11 : 9;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const label =
     value >= 80
-      ? "Very high opportunity"
+      ? t("opportunity.veryHigh")
       : value >= 70
-        ? "High opportunity"
+        ? t("opportunity.high")
         : value >= 55
-          ? "Moderate opportunity"
-          : "Low opportunity";
+          ? t("opportunity.moderate")
+          : t("opportunity.low");
 
   return (
     <figure className="flex flex-col items-center gap-2">
@@ -292,7 +299,7 @@ export function OpportunityScore({ value, size = 132 }: { value: number; size?: 
           height={size}
           viewBox={`0 0 ${size} ${size}`}
           role="img"
-          aria-label={`Opportunity score ${value} out of 100. ${label}.`}
+          aria-label={t("opportunity.aria", { value, label })}
         >
           <circle
             cx={size / 2}
@@ -327,7 +334,7 @@ export function OpportunityScore({ value, size = 132 }: { value: number; size?: 
           </span>
           {size >= 120 && (
             <span className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Opportunity
+              {t("opportunity.label")}
             </span>
           )}
         </div>
@@ -378,12 +385,10 @@ export interface SourceDisplay {
 }
 
 export function SourceList({ sources }: { sources: SourceDisplay[] }) {
+  const { t } = useTranslation();
+
   if (sources.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        No source documents are linked to this answer yet.
-      </p>
-    );
+    return <p className="text-sm text-muted-foreground">{t("sources.none")}</p>;
   }
   return (
     <ul className="grid gap-3 sm:grid-cols-3">

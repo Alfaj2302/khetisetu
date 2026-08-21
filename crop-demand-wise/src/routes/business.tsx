@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AlertTriangle, CircleAlert, Truck, X } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 
 import { hasApiToken } from "@/services/api";
 import {
@@ -23,22 +24,23 @@ import {
   Pill,
   Section,
 } from "@/components/kheti/primitives";
+import { tFor } from "@/lib/i18n";
+import { readLanguage } from "@/lib/i18n/language";
 
 export const Route = createFileRoute("/business")({
-  head: () => ({
-    meta: [
-      { title: "Agri Business supply planning | KhetiSetu" },
-      {
-        name: "description",
-        content:
-          "Turn aggregated farmer crop intent into fertilizer demand forecasts, supply alerts and dispatch actions.",
-      },
-      { property: "og:title", content: "Agri Business supply planning | KhetiSetu" },
-      { property: "og:description", content: "From farmer intent to smart supply planning." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () => {
+    const t = tFor(readLanguage());
+    return {
+      meta: [
+        { title: t("business.meta.title") },
+        { name: "description", content: t("business.meta.description") },
+        { property: "og:title", content: t("business.meta.ogTitle") },
+        { property: "og:description", content: t("business.meta.ogDescription") },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+    };
+  },
   component: Business,
 });
 
@@ -48,6 +50,7 @@ const controlCls =
   "mt-2 w-full rounded-lg border border-border bg-input px-3 py-2.5 text-sm text-foreground focus:border-primary";
 
 function Business() {
+  const { t } = useTranslation();
   const [districtId, setDistrictId] = useState<number | null>(null);
   const [seasonId, setSeasonId] = useState<number | null>(null);
   const [year, setYear] = useState(new Date().getFullYear());
@@ -82,17 +85,30 @@ function Business() {
   const alerts = useBusinessAlerts(districtId, ready);
 
   const productName = (productId: number) =>
-    products.data?.find((p) => p.id === productId)?.product_name ?? `Product #${productId}`;
+    products.data?.find((p) => p.id === productId)?.product_name ??
+    t("business.productFallback", { id: productId });
   const districtName = (id: number) =>
-    districts.data?.find((d) => d.id === id)?.name ?? `District #${id}`;
+    districts.data?.find((d) => d.id === id)?.name ?? t("business.districtFallback", { id });
+
+  const panelTitle =
+    panel === "forecast"
+      ? t("business.panels.forecastTitle", {
+          district: districtId ? districtName(districtId) : "",
+          year,
+        })
+      : panel === "inventory"
+        ? t("business.panels.inventoryTitle", {
+            district: districtId ? districtName(districtId) : "",
+          })
+        : t("business.panels.transfersTitle");
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-12">
       <div className="min-w-0">
         <h1 className="text-2xl font-extrabold text-foreground md:text-3xl">
-          KhetiSetu — Agri Business
+          {t("business.title")}
         </h1>
-        <p className="mt-2 text-muted-foreground">From farmer intent to smart supply planning.</p>
+        <p className="mt-2 text-muted-foreground">{t("business.subtitle")}</p>
         {dashboard.data && (
           <div className="mt-3">
             <Pill tone="primary">{dashboard.data.season}</Pill>
@@ -102,14 +118,15 @@ function Business() {
 
       {!hasApiToken && (
         <div className="mt-6 rounded-lg border border-warning/40 bg-warning/5 p-4">
-          <p className="text-sm font-semibold text-foreground">
-            These panels need an API token with the AGRI_BUSINESS or ADMIN role
-          </p>
+          <p className="text-sm font-semibold text-foreground">{t("business.tokenNoticeTitle")}</p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Set <code className="rounded bg-muted px-1 py-0.5 text-xs">VITE_API_TOKEN</code> in this
-            app's <code className="rounded bg-muted px-1 py-0.5 text-xs">.env</code> and restart the
-            dev server. See <code className="text-xs">src/services/README.md</code> for how to mint
-            one.
+            <Trans
+              i18nKey="business.tokenNoticeDetail"
+              components={{
+                code: <code className="rounded bg-muted px-1 py-0.5 text-xs" />,
+                path: <code className="text-xs" />,
+              }}
+            />
           </p>
         </div>
       )}
@@ -118,7 +135,7 @@ function Business() {
       <div className="surface-card mt-6 grid gap-4 p-4 sm:grid-cols-3 md:p-5">
         <div>
           <label className="block text-sm font-semibold text-foreground" htmlFor="b-district">
-            District
+            {t("fields.district")}
           </label>
           <select
             id="b-district"
@@ -135,7 +152,7 @@ function Business() {
         </div>
         <div>
           <label className="block text-sm font-semibold text-foreground" htmlFor="b-season">
-            Season
+            {t("fields.season")}
           </label>
           <select
             id="b-season"
@@ -152,7 +169,7 @@ function Business() {
         </div>
         <div>
           <label className="block text-sm font-semibold text-foreground" htmlFor="b-year">
-            Year
+            {t("fields.year")}
           </label>
           <input
             id="b-year"
@@ -174,18 +191,18 @@ function Business() {
 
       {dashboard.isPending && ready ? (
         <div className="mt-6">
-          <LoadingState label="Loading dashboard…" />
+          <LoadingState label={t("business.loading")} />
         </div>
       ) : dashboard.data ? (
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <Section
-            title="Expected input demand"
-            description="Forecast fertilizer volumes for the selected district and year."
+            title={t("business.demand.title")}
+            description={t("business.demand.description")}
           >
             {dashboard.data.expected_input_demand.length === 0 ? (
               <EmptyState
-                title="No forecast rows yet"
-                detail="This reads the API's forecast table, written by the batch ML job. Until that job has run, there is nothing to show."
+                title={t("business.demand.emptyTitle")}
+                detail={t("business.demand.emptyDetail")}
               />
             ) : (
               <dl className="grid gap-3 sm:grid-cols-3">
@@ -193,7 +210,7 @@ function Business() {
                   <Metric
                     key={item.product}
                     label={item.product}
-                    value={`${formatNumber(item.quantity_mt)} MT`}
+                    value={t("business.megaTonnes", { value: formatNumber(item.quantity_mt) })}
                   />
                 ))}
               </dl>
@@ -201,13 +218,13 @@ function Business() {
           </Section>
 
           <Section
-            title="Farmer crop intent"
-            description="Aggregated and anonymized — grouped by crop, never by farmer."
+            title={t("business.intent.title")}
+            description={t("business.intent.description")}
           >
             {dashboard.data.farmer_crop_intent.length === 0 ? (
               <EmptyState
-                title="No intent recorded for this scope"
-                detail="No farmer has submitted a crop plan for this district, season and year yet."
+                title={t("business.intent.emptyTitle")}
+                detail={t("business.intent.emptyDetail")}
               />
             ) : (
               <>
@@ -222,7 +239,7 @@ function Business() {
                         <div className="flex items-center justify-between text-sm">
                           <span className="font-semibold text-foreground">{item.crop}</span>
                           <span className="text-muted-foreground">
-                            {formatNumber(item.acres)} acres
+                            {t("common.acres", { value: formatNumber(item.acres) })}
                           </span>
                         </div>
                         <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
@@ -235,20 +252,21 @@ function Business() {
                     );
                   })}
                 </ul>
-                <p className="mt-3 text-xs text-muted-foreground">
-                  The API aggregates by crop and never returns farmer identity for this view.
-                </p>
+                <p className="mt-3 text-xs text-muted-foreground">{t("business.intent.note")}</p>
               </>
             )}
           </Section>
 
-          <Section title="Supply alerts" description="Recommendation rows flagged for action.">
+          <Section
+            title={t("business.alerts.title")}
+            description={t("business.alerts.description")}
+          >
             {alerts.isError ? (
               <ErrorState error={alerts.error} onRetry={() => void alerts.refetch()} />
             ) : (alerts.data ?? []).length === 0 ? (
               <EmptyState
-                title="No open alerts"
-                detail="Alerts come from the API's recommendations table, also written by the batch ML job."
+                title={t("business.alerts.emptyTitle")}
+                detail={t("business.alerts.emptyDetail")}
               />
             ) : (
               <ul className="space-y-2">
@@ -269,12 +287,22 @@ function Business() {
                         aria-hidden
                       />
                       <span className="text-foreground">
-                        <strong>{alert.district}</strong> — {alert.message}{" "}
-                        <span
-                          className={`font-semibold ${isHigh ? "text-destructive" : "text-warning"}`}
-                        >
-                          ({alert.severity})
-                        </span>
+                        <Trans
+                          i18nKey="business.alerts.row"
+                          values={{
+                            district: alert.district,
+                            message: alert.message,
+                            severity: alert.severity,
+                          }}
+                          components={{
+                            district: <strong />,
+                            severity: (
+                              <span
+                                className={`font-semibold ${isHigh ? "text-destructive" : "text-warning"}`}
+                              />
+                            ),
+                          }}
+                        />
                       </span>
                     </li>
                   );
@@ -284,13 +312,13 @@ function Business() {
           </Section>
 
           <Section
-            title="Recommended action"
-            description="Latest recommendation for this district."
+            title={t("business.action.title")}
+            description={t("business.action.description")}
           >
             {dashboard.data.recommended_action === null ? (
               <EmptyState
-                title="No recommended action yet"
-                detail="The API has no recommendation row for this district."
+                title={t("business.action.emptyTitle")}
+                detail={t("business.action.emptyDetail")}
               />
             ) : (
               <>
@@ -299,35 +327,51 @@ function Business() {
                 </p>
                 <dl className="mt-3 grid gap-3 sm:grid-cols-3">
                   <Metric
-                    label="Forecast"
-                    value={`${formatNumber(dashboard.data.recommended_action.forecast_mt)} MT`}
+                    label={t("business.action.forecast")}
+                    value={t("business.megaTonnes", {
+                      value: formatNumber(dashboard.data.recommended_action.forecast_mt),
+                    })}
                   />
                   <Metric
-                    label="Current stock"
-                    value={`${formatNumber(dashboard.data.recommended_action.current_stock_mt)} MT`}
+                    label={t("business.action.currentStock")}
+                    value={t("business.megaTonnes", {
+                      value: formatNumber(dashboard.data.recommended_action.current_stock_mt),
+                    })}
                   />
                   <Metric
-                    label="Safety stock"
-                    value={`${formatNumber(dashboard.data.recommended_action.safety_stock_mt)} MT`}
+                    label={t("business.action.safetyStock")}
+                    value={t("business.megaTonnes", {
+                      value: formatNumber(dashboard.data.recommended_action.safety_stock_mt),
+                    })}
                   />
                 </dl>
                 <p className="mt-4 flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 text-base font-bold text-primary">
                   <Truck className="h-5 w-5" aria-hidden />
                   {dashboard.data.recommended_action.action}
                   {dashboard.data.recommended_action.recommended_dispatch_mt !== null &&
-                    ` ${formatNumber(dashboard.data.recommended_action.recommended_dispatch_mt)} MT`}
+                    ` ${t("business.megaTonnes", {
+                      value: formatNumber(
+                        dashboard.data.recommended_action.recommended_dispatch_mt,
+                      ),
+                    })}`}
                 </p>
               </>
             )}
             <div className="mt-4 flex flex-wrap gap-2">
-              {(["forecast", "inventory", "transfers"] as const).map((key) => (
+              {(
+                [
+                  { key: "forecast", labelKey: "business.panels.viewForecast" },
+                  { key: "inventory", labelKey: "business.panels.viewInventory" },
+                  { key: "transfers", labelKey: "business.panels.viewTransfers" },
+                ] as const
+              ).map(({ key, labelKey }) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => setPanel(key)}
-                  className="rounded-lg border border-border bg-card px-4 py-3 text-sm font-semibold capitalize text-foreground hover:bg-muted"
+                  className="rounded-lg border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground hover:bg-muted"
                 >
-                  View {key}
+                  {t(labelKey)}
                 </button>
               ))}
             </div>
@@ -336,39 +380,29 @@ function Business() {
       ) : null}
 
       <div className="mt-6">
-        <Disclaimer>
-          Expected demand, alerts and recommended actions read the API's batch-ML output tables.
-          Empty panels mean that job has not run for this scope — not that there is nothing to plan
-          for. Inventory and transfers read live tables.
-        </Disclaimer>
+        <Disclaimer>{t("business.disclaimer")}</Disclaimer>
       </div>
 
       {panel && (
         <div className="fixed inset-0 z-50">
           <button
             type="button"
-            aria-label="Close panel"
+            aria-label={t("business.panels.closePanel")}
             onClick={() => setPanel(null)}
             className="absolute inset-0 bg-foreground/40"
           />
           <div
             role="dialog"
             aria-modal="true"
-            aria-label={`${panel} detail`}
+            aria-label={panelTitle}
             className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-2xl bg-card p-5 shadow-lift animate-in slide-in-from-bottom sm:inset-y-0 sm:left-auto sm:right-0 sm:max-h-none sm:w-[460px] sm:rounded-none sm:rounded-l-2xl sm:p-6 sm:slide-in-from-right"
           >
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
-              <h2 className="text-lg font-bold text-foreground">
-                {panel === "forecast"
-                  ? `Demand forecast — ${districtId ? districtName(districtId) : ""} ${year}`
-                  : panel === "inventory"
-                    ? `Inventory — ${districtId ? districtName(districtId) : ""}`
-                    : "Suggested stock transfers"}
-              </h2>
+              <h2 className="text-lg font-bold text-foreground">{panelTitle}</h2>
               <button
                 type="button"
                 onClick={() => setPanel(null)}
-                aria-label="Close"
+                aria-label={t("common.close")}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-muted"
               >
                 <X className="h-5 w-5" />
@@ -383,8 +417,8 @@ function Business() {
                   <ErrorState error={forecast.error} />
                 ) : (forecast.data ?? []).length === 0 ? (
                   <EmptyState
-                    title="No forecast rows"
-                    detail="The API's forecast table is empty for this district and year."
+                    title={t("business.panels.forecastEmptyTitle")}
+                    detail={t("business.panels.forecastEmptyDetail")}
                   />
                 ) : (
                   <dl className="space-y-2">
@@ -394,7 +428,7 @@ function Business() {
                         className="flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm"
                       >
                         <dt className="min-w-0 text-muted-foreground">
-                          {productName(row.product_id)} · {monthLabel(row.month)} {row.year}
+                          {productName(row.product_id)} · {monthLabel(t, row.month)} {row.year}
                         </dt>
                         <dd className="shrink-0 font-semibold text-foreground">
                           {formatNumber(row.predicted_demand)}
@@ -411,7 +445,7 @@ function Business() {
                 ) : inventory.isError ? (
                   <ErrorState error={inventory.error} />
                 ) : (inventory.data ?? []).length === 0 ? (
-                  <EmptyState title="No inventory rows for this district" />
+                  <EmptyState title={t("business.panels.inventoryEmptyTitle")} />
                 ) : (
                   <dl className="space-y-2">
                     {(inventory.data ?? []).map((row, index) => (
@@ -422,7 +456,9 @@ function Business() {
                         <dt className="min-w-0 text-muted-foreground">
                           {productName(row.product_id)}
                           {row.batch_no ? ` · ${row.batch_no}` : ""}
-                          {row.expiry_date ? ` · exp ${row.expiry_date}` : ""}
+                          {row.expiry_date
+                            ? ` · ${t("business.panels.expiry", { date: row.expiry_date })}`
+                            : ""}
                         </dt>
                         <dd className="shrink-0 font-semibold text-foreground">
                           {formatNumber(row.quantity)}
@@ -439,8 +475,8 @@ function Business() {
                   <ErrorState error={transfers.error} />
                 ) : (transfers.data ?? []).length === 0 ? (
                   <EmptyState
-                    title="No transfers suggested"
-                    detail="No district currently holds a surplus that covers another's shortage."
+                    title={t("business.panels.transfersEmptyTitle")}
+                    detail={t("business.panels.transfersEmptyDetail")}
                   />
                 ) : (
                   <ul className="space-y-2">

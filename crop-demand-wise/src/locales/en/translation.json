@@ -1,0 +1,608 @@
+{
+  "common": {
+    "findBestCrops": "Find Best Crops",
+    "tryAgain": "Try again",
+    "goHome": "Go home",
+    "close": "Close",
+    "analyseMyFarm": "Analyse my farm",
+    "notAvailable": "Not available",
+    "yes": "Yes",
+    "no": "No",
+    "loading": "Loading…",
+    "acres": "{{value}} acres",
+    "score": "{{value}}/100",
+    "testWeatherScenario": "Test weather scenario",
+    "backToRecommendations": "Back to recommendations"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "hi": "हिंदी",
+    "mr": "मराठी"
+  },
+  "nav": {
+    "farmer": "Farmer",
+    "business": "Agri Business",
+    "howItWorks": "How It Works",
+    "reliability": "AI Reliability",
+    "ask": "Ask KhetiSetu",
+    "main": "Main",
+    "mobile": "Mobile",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "home": "KhetiSetu home",
+    "logoAlt": "KhetiSetu — From crop decisions to smart supply"
+  },
+  "fields": {
+    "state": "State",
+    "district": "District",
+    "season": "Season",
+    "year": "Year"
+  },
+  "metrics": {
+    "expectedDemand": "Expected demand",
+    "expectedSupply": "Expected supply",
+    "demandGap": "Demand gap"
+  },
+  "months": {
+    "1": "January",
+    "2": "February",
+    "3": "March",
+    "4": "April",
+    "5": "May",
+    "6": "June",
+    "7": "July",
+    "8": "August",
+    "9": "September",
+    "10": "October",
+    "11": "November",
+    "12": "December"
+  },
+  "format": {
+    "weeks_one": "{{count}} week",
+    "weeks_other": "{{count}} weeks",
+    "weeksRange": "{{min}}–{{max}} weeks",
+    "units": "units"
+  },
+  "root": {
+    "meta": {
+      "title": "KhetiSetu — From Crop Decisions to Smart Supply",
+      "description": "KhetiSetu helps Indian farmers choose crops with stronger demand opportunities using weather, season rules and demand-supply intelligence.",
+      "ogTitle": "KhetiSetu — From Crop Decisions to Smart Supply",
+      "ogDescription": "Crop decision support for farmers and supply planning for agri-businesses."
+    },
+    "notFound": {
+      "title": "Page not found",
+      "detail": "The page you're looking for doesn't exist or has been moved."
+    },
+    "error": {
+      "title": "This page didn't load",
+      "detail": "Something went wrong on our end. You can try refreshing or head back home."
+    },
+    "footer": {
+      "tagline": "KhetiSetu — From Crop Decisions to Smart Supply.",
+      "disclaimer": "Live data from the KhetiSetu API. Rows the API reports as synthetic backfill, and guidance it reports as unverified, are labelled where they appear. KhetiSetu provides decision support — it does not guarantee yield, demand or profitability. Final crop and input decisions should follow local agricultural advisories."
+    }
+  },
+  "home": {
+    "meta": {
+      "title": "KhetiSetu — Know what to grow, know what the market needs",
+      "description": "KhetiSetu combines historical crop demand, weather and season rules to help Indian farmers find crops with stronger demand opportunities.",
+      "ogTitle": "KhetiSetu — Know what to grow",
+      "ogDescription": "Crop opportunity intelligence for farmers and supply planning for agri-businesses."
+    },
+    "badge": "Prototype · demo data",
+    "headlineTop": "Know what to grow.",
+    "headlineBottom": "Know what the market needs.",
+    "intro": "KhetiSetu combines historical crop demand, weather and agricultural season rules to help farmers identify crops with stronger future demand opportunities.",
+    "seeHowItWorks": "See How It Works",
+    "note": "Decision support, not a profit guarantee. Every number in this prototype is synthetic demo data.",
+    "heroAlt": "Indian farmer checking crop information on a mobile phone in a tomato and onion field",
+    "overlays": {
+      "districtLabel": "Nashik",
+      "districtValue": "Kharif 2026",
+      "weatherLabel": "Weather",
+      "weatherValue": "Favorable",
+      "demandLabel": "Demand",
+      "demandValue": "Increasing",
+      "opportunityLabel": "Opportunity",
+      "opportunityValue": "High"
+    },
+    "benefits": {
+      "heading": "Built around one question farmers actually face",
+      "subheading": "Not just \"how do I grow this crop\", but \"will there likely be demand when my crop is ready?\"",
+      "crop": {
+        "title": "Smarter crop decisions",
+        "body": "Compare crop options for your farm instead of guessing from last season's prices."
+      },
+      "weather": {
+        "title": "Weather-aware recommendations",
+        "body": "See how expected rainfall and temperature influence crop suitability."
+      },
+      "demand": {
+        "title": "Demand–supply intelligence",
+        "body": "Identify demand gaps before you decide what to sow."
+      }
+    },
+    "pipeline": {
+      "heading": "From demand gap to crop opportunity",
+      "body": "KhetiSetu brings farmer context, historical demand, expected supply, weather and crop season rules together — then explains the recommendation instead of pretending to predict the future perfectly.",
+      "businessCta": "Agri Business preview",
+      "reliabilityCta": "AI reliability",
+      "steps": {
+        "context": "Farmer context",
+        "demand": "Historical demand",
+        "supply": "Expected supply",
+        "weather": "Weather",
+        "season": "Crop season rules",
+        "result": "→ Demand gap → Recommendation"
+      }
+    }
+  },
+  "farmer": {
+    "meta": {
+      "title": "Tell us about your farm | KhetiSetu",
+      "description": "Share your location, land size, irrigation and sowing plan so KhetiSetu can suggest crop opportunities.",
+      "ogTitle": "Tell us about your farm | KhetiSetu",
+      "ogDescription": "Simple farm inputs, clear crop opportunities."
+    },
+    "title": "Let's understand your farm.",
+    "subtitle": "Five short questions. We use them to check season rules, weather and demand for your district.",
+    "progressLabel": "Progress",
+    "step": "{{index}} {{label}}",
+    "steps": {
+      "farm": "Farm",
+      "conditions": "Conditions",
+      "crop": "Crop",
+      "results": "Results"
+    },
+    "analysing": {
+      "title": "Analyzing your farm...",
+      "detail": "Checking crop season, demand, weather and supply conditions."
+    },
+    "location": {
+      "legend": "Where is your farm?",
+      "loading": "Loading states and districts…",
+      "summary": "{{district}}, {{state}}"
+    },
+    "land": {
+      "legend": "Your land and water",
+      "label": "How much land do you have?",
+      "unit": "Acres",
+      "help": "Enter the area you plan to sow, in acres.",
+      "error": "Please enter land between 0.1 and 500 acres.",
+      "irrigationLabel": "Is irrigation available?"
+    },
+    "crop": {
+      "legend": "Your crop plan",
+      "previousLabel": "What did you grow previously?",
+      "previousNone": "Not sure / first season",
+      "sowingLabel": "When are you planning to sow?"
+    },
+    "toast": {
+      "districtRequired": "Select a district first",
+      "noCropsTitle": "No eligible crops found",
+      "noCropsDetail": "The crop calendar has no entry for {{district}} in this sowing month.",
+      "successTitle": "Farm analysed",
+      "successDetail": "Showing your top crop opportunities."
+    }
+  },
+  "recommendations": {
+    "meta": {
+      "title": "Your crop opportunities | KhetiSetu",
+      "description": "Top crop opportunities for your farm, with demand gap, weather suitability, risk and confidence.",
+      "ogTitle": "Your crop opportunities | KhetiSetu",
+      "ogDescription": "Ranked crop opportunities with explanations."
+    },
+    "title": "Your Crop Opportunities",
+    "subtitle": "Based on your location, season, weather and recorded demand.",
+    "empty": {
+      "title": "No analysis yet",
+      "detail": "Tell KhetiSetu about your farm and it will rank the crops that are eligible for your district and sowing month."
+    },
+    "context": {
+      "irrigationAvailable": "Irrigation available",
+      "noIrrigation": "No irrigation",
+      "previousCrop": "Previous crop: {{crop}}",
+      "sowing": "Sowing: {{month}}"
+    },
+    "changeDetails": "Change details",
+    "noEligible": {
+      "title": "No crops are eligible for this district and month",
+      "detail": "The API found no crop calendar entry for {{district}} in {{month}}. Try a different sowing month or district.",
+      "action": "Change my details"
+    },
+    "topCrops_one": "Top {{count}} crop to consider",
+    "topCrops_other": "Top {{count}} crops to consider",
+    "chart": {
+      "title": "Demand vs expected supply",
+      "description": "Positive gap = opportunity. Negative gap = possible oversupply.",
+      "emptyTitle": "No market figures for these crops yet",
+      "emptyDetail": "The API has no demand/supply row for this district and crop combination."
+    },
+    "weatherLoading": "Loading weather outlook…",
+    "disclaimer": "Demand and supply figures come from the API's recorded market data; rows extended by synthetic backfill are marked as such at the source. KhetiSetu provides decision support — the final crop decision remains yours.",
+    "askCta": "Ask KhetiSetu about this recommendation"
+  },
+  "cropCard": {
+    "topOpportunity": "Top opportunity",
+    "demandLevel": "{{level}} demand",
+    "weatherTag": "Weather: {{tag}}",
+    "gapPositive": "Positive gap = opportunity",
+    "gapNegative": "Negative gap = oversupply risk",
+    "weatherSuitability": "Weather suitability",
+    "viewPlan": "View crop plan",
+    "why": "Why {{crop}}?"
+  },
+  "whyDrawer": {
+    "closeExplanation": "Close explanation",
+    "title": "Why did KhetiSetu recommend {{crop}}?",
+    "decisionTrace": "Decision trace",
+    "loadingTrace": "Loading decision trace…",
+    "disclaimer": "KhetiSetu does not guarantee crop profitability. This ranking is decision support computed from recorded demand, supply and weather data for your district."
+  },
+  "weather": {
+    "title": "{{district}} weather outlook",
+    "description": "Averaged from recorded weather history for your sowing month.",
+    "rainfall": "Rainfall",
+    "temperature": "Temperature",
+    "humidity": "Humidity",
+    "forecast": "Forecast",
+    "next7Days": "Next 7 days",
+    "rainChance": "Rain {{value}}%",
+    "rainUnknown": "Rain —",
+    "emptyTitle": "No daily forecast available",
+    "emptyDetail": "Short-range forecasts come from the API's weather_forecast table, which is filled by a live weather integration that isn't connected yet."
+  },
+  "chart": {
+    "aria": "Bar chart comparing expected demand and expected supply.",
+    "ariaRow": "{{crop}}: demand {{demand}} {{unit}}, supply {{supply}} {{unit}}, gap {{gap}} {{unit}}",
+    "tooltipValue": "{{value}} {{unit}}",
+    "gapOpportunity": "▲ Opportunity +{{gap}} {{unit}}",
+    "gapOversupply": "▼ Possible oversupply {{gap}} {{unit}}"
+  },
+  "cropDetail": {
+    "meta": {
+      "title": "Crop plan | KhetiSetu",
+      "description": "Demand outlook, weather suitability, indicative inputs, risk and confidence for a crop in your district.",
+      "ogTitle": "Crop plan | KhetiSetu",
+      "ogDescription": "Explainable crop decision support."
+    },
+    "needDistrictTitle": "Pick your district first",
+    "needDistrictDetail": "Crop details are district-specific — the API needs a district to look up market and weather data.",
+    "loading": "Loading crop plan…",
+    "demandTag": "{{level}} DEMAND",
+    "weatherTag": "{{tag}} WEATHER",
+    "why": {
+      "title": "Why {{crop}}?",
+      "description": "How KhetiSetu reached this recommendation."
+    },
+    "demandOutlook": {
+      "title": "Demand outlook",
+      "description": "Latest recorded demand and supply for this crop in your district.",
+      "emptyTitle": "No market figures recorded",
+      "emptyDetail": "The API has no demand/supply row for this district and crop yet."
+    },
+    "weather": {
+      "title": "Weather suitability",
+      "description": "Averaged from recorded weather history.",
+      "overall": "Overall weather suitability for {{crop}}: <score>{{score}}/100</score>."
+    },
+    "season": {
+      "title": "Crop season",
+      "description": "From the crop calendar for your district.",
+      "sowingMonths": "Sowing months",
+      "growingPeriod": "Growing period",
+      "harvestWindow": "Harvest window"
+    },
+    "guidance": {
+      "title": "Indicative agronomic guidance",
+      "description": "Nutrient rates recorded for this crop.",
+      "emptyTitle": "No nutrient guidance recorded",
+      "emptyDetail": "The API has no fertilizer recommendation for this crop.",
+      "nitrogen": "Nitrogen (N)",
+      "phosphorus": "Phosphorus (P)",
+      "potassium": "Potassium (K)",
+      "rate": "{{value}} kg / ha",
+      "applicationStage": "Application stage: <stage>{{stage}}</stage>",
+      "disclaimer": "Final fertilizer recommendations should follow local agricultural advisories / soil-test recommendations."
+    },
+    "risk": {
+      "title": "Risk",
+      "description": "What could go differently this season."
+    },
+    "confidence": {
+      "title": "Confidence",
+      "description": "How sure the system is about this recommendation."
+    },
+    "sources": {
+      "title": "Sources",
+      "description": "Documents linked to the guidance above.",
+      "show": "View sources",
+      "hide": "Hide sources",
+      "none": "No source document is linked to this crop's guidance yet.",
+      "count_one": "{{count}} linked source.",
+      "count_other": "{{count}} linked sources."
+    },
+    "intent": {
+      "title": "Planning to grow this?",
+      "description": "Records your intent so agri-businesses can plan input supply. Aggregated only — never shown per farmer.",
+      "saved": "Saved — your {{crop}} plan was recorded.",
+      "saving": "Saving…",
+      "cta": "I'm growing {{crop}}",
+      "seasonUnknownTitle": "Season unknown",
+      "seasonUnknownDetail": "Run the farm analysis first so KhetiSetu knows which season this is.",
+      "savedToastTitle": "Saved",
+      "savedToastDetail": "Recorded that you plan to grow {{crop}}.",
+      "errorTitle": "Could not save your crop plan"
+    }
+  },
+  "whatif": {
+    "meta": {
+      "title": "Weather what-if scenario | KhetiSetu",
+      "description": "Move the rainfall slider and see how crop opportunity scores and the safest recommendation change.",
+      "ogTitle": "Weather what-if scenario | KhetiSetu",
+      "ogDescription": "Simulate rainfall changes on crop suitability."
+    },
+    "emptyTitle": "Analyse your farm first",
+    "emptyDetail": "The scenario runs against the crops KhetiSetu ranked for your district, so it needs a recommendation to work from.",
+    "title": "What if the weather changes?",
+    "subtitle": "Adjust expected rainfall for {{district}} and see how crop opportunity scores respond.",
+    "expectedRainfall": "Expected rainfall",
+    "sliderLabel": "Rainfall change vs normal",
+    "sliderValueText": "{{delta}} percent rainfall",
+    "normal": "Normal",
+    "scoresHeading": "Opportunity scores in this scenario",
+    "running": "Running scenario…",
+    "newSaferOption": "New safer option",
+    "cropFallback": "Crop #{{id}}",
+    "changedTitle": "Recommendation changed",
+    "unchangedTitle": "Recommendation unchanged",
+    "changedDetail": "Under a {{delta}}% rainfall change, {{crop}} scores highest — a different crop than the baseline ranking.",
+    "unchangedDetail": "{{crop}} still leads under a {{delta}}% rainfall change.",
+    "viewPlan": "View {{crop}} crop plan",
+    "disclaimer": "The scenario rescales recorded rainfall for your district and re-scores weather suitability. It does not model soil, variety or field management, which also change how a crop responds to rainfall."
+  },
+  "business": {
+    "meta": {
+      "title": "Agri Business supply planning | KhetiSetu",
+      "description": "Turn aggregated farmer crop intent into fertilizer demand forecasts, supply alerts and dispatch actions.",
+      "ogTitle": "Agri Business supply planning | KhetiSetu",
+      "ogDescription": "From farmer intent to smart supply planning."
+    },
+    "title": "KhetiSetu — Agri Business",
+    "subtitle": "From farmer intent to smart supply planning.",
+    "tokenNoticeTitle": "These panels need an API token with the AGRI_BUSINESS or ADMIN role",
+    "tokenNoticeDetail": "Set <code>VITE_API_TOKEN</code> in this app's <code>.env</code> and restart the dev server. See <path>src/services/README.md</path> for how to mint one.",
+    "loading": "Loading dashboard…",
+    "demand": {
+      "title": "Expected input demand",
+      "description": "Forecast fertilizer volumes for the selected district and year.",
+      "emptyTitle": "No forecast rows yet",
+      "emptyDetail": "This reads the API's forecast table, written by the batch ML job. Until that job has run, there is nothing to show."
+    },
+    "megaTonnes": "{{value}} MT",
+    "intent": {
+      "title": "Farmer crop intent",
+      "description": "Aggregated and anonymized — grouped by crop, never by farmer.",
+      "emptyTitle": "No intent recorded for this scope",
+      "emptyDetail": "No farmer has submitted a crop plan for this district, season and year yet.",
+      "note": "The API aggregates by crop and never returns farmer identity for this view."
+    },
+    "alerts": {
+      "title": "Supply alerts",
+      "description": "Recommendation rows flagged for action.",
+      "emptyTitle": "No open alerts",
+      "emptyDetail": "Alerts come from the API's recommendations table, also written by the batch ML job.",
+      "row": "<district>{{district}}</district> — {{message}} <severity>({{severity}})</severity>"
+    },
+    "action": {
+      "title": "Recommended action",
+      "description": "Latest recommendation for this district.",
+      "emptyTitle": "No recommended action yet",
+      "emptyDetail": "The API has no recommendation row for this district.",
+      "forecast": "Forecast",
+      "currentStock": "Current stock",
+      "safetyStock": "Safety stock"
+    },
+    "panels": {
+      "viewForecast": "View forecast",
+      "viewInventory": "View inventory",
+      "viewTransfers": "View transfers",
+      "forecastTitle": "Demand forecast — {{district}} {{year}}",
+      "inventoryTitle": "Inventory — {{district}}",
+      "transfersTitle": "Suggested stock transfers",
+      "closePanel": "Close panel",
+      "forecastEmptyTitle": "No forecast rows",
+      "forecastEmptyDetail": "The API's forecast table is empty for this district and year.",
+      "inventoryEmptyTitle": "No inventory rows for this district",
+      "transfersEmptyTitle": "No transfers suggested",
+      "transfersEmptyDetail": "No district currently holds a surplus that covers another's shortage.",
+      "expiry": "exp {{date}}"
+    },
+    "productFallback": "Product #{{id}}",
+    "districtFallback": "District #{{id}}",
+    "disclaimer": "Expected demand, alerts and recommended actions read the API's batch-ML output tables. Empty panels mean that job has not run for this scope — not that there is nothing to plan for. Inventory and transfers read live tables."
+  },
+  "ask": {
+    "meta": {
+      "title": "Ask KhetiSetu | Crop recommendation assistant",
+      "description": "Ask why a crop was recommended, how rainfall changes the ranking, and what inputs it needs.",
+      "ogTitle": "Ask KhetiSetu",
+      "ogDescription": "A farmer-friendly assistant for your crop recommendation."
+    },
+    "title": "Ask KhetiSetu",
+    "subtitle": "Ask about your crop recommendation. Answers are grounded in indexed sources only.",
+    "tokenNoticeTitle": "This endpoint needs an API token",
+    "tokenNoticeDetail": "The API requires a bearer token on <path>/rag/query</path>. Set <code>VITE_API_TOKEN</code> in this app's <code>.env</code> and restart the dev server. Sending a question below will show the API's reply either way.",
+    "intro": "Namaste! I answer from sources indexed in the KhetiSetu knowledge base and the recorded data for your district — so if I don't have grounded information for something, I'll say so rather than guess.",
+    "searching": "KhetiSetu is searching indexed sources…",
+    "unreachable": "The knowledge base could not be reached.",
+    "unverifiedGuidance": "Includes unverified guidance",
+    "suggestedHeading": "Suggested questions",
+    "suggestions": {
+      "whyFirst": "Why is this crop ranked first?",
+      "lowerRainfall": "What happens if rainfall is lower?",
+      "fertilizer": "What fertilizer does this crop need?",
+      "whenToSow": "When should I sow?",
+      "demandGap": "How is the demand gap calculated?"
+    },
+    "inputLabel": "Your question",
+    "inputPlaceholder": "Type your question…",
+    "send": "Send question",
+    "disclaimer": "Answers come from the API's retrieval layer over indexed source documents. No language model is involved, and the assistant declines rather than answering from an unindexed topic."
+  },
+  "howItWorks": {
+    "meta": {
+      "title": "How KhetiSetu works | Crop opportunity in five steps",
+      "description": "From farmer context and agricultural data to AI forecast, crop ranking, explanation and weather what-if.",
+      "ogTitle": "How KhetiSetu works",
+      "ogDescription": "Five steps from farm details to an explained crop recommendation."
+    },
+    "title": "How KhetiSetu works",
+    "subtitle": "Five steps that connect what you can grow with what the market may need.",
+    "stepLabel": "Step {{index}}",
+    "steps": {
+      "context": {
+        "title": "Farmer context",
+        "body": "Location • Land • Irrigation • Previous crop"
+      },
+      "data": {
+        "title": "Agricultural data",
+        "body": "Weather • Crop calendar • Historical data"
+      },
+      "forecast": {
+        "title": "AI forecast",
+        "body": "Expected demand • Expected supply"
+      },
+      "ranking": {
+        "title": "Crop ranking",
+        "body": "Top 3 opportunities for your farm"
+      },
+      "explain": {
+        "title": "Explain & simulate",
+        "body": "AI explanation • Weather what-if"
+      }
+    },
+    "coreIdeaTitle": "The core idea",
+    "coreIdeaBody": "Farmers need to understand not only what they can grow, but whether there may be demand when the crop is ready. KhetiSetu turns the gap between expected demand and expected supply into a clear crop opportunity — and explains how it got there."
+  },
+  "reliability": {
+    "meta": {
+      "title": "AI Reliability & Responsible AI | KhetiSetu",
+      "description": "How KhetiSetu evaluates forecasts, communicates confidence, and handles edge cases responsibly.",
+      "ogTitle": "AI Reliability & Responsible AI | KhetiSetu",
+      "ogDescription": "Evaluation, confidence and responsible AI practices."
+    },
+    "title": "AI Reliability & Responsible AI",
+    "subtitle": "Why the recommendations can be trusted — and where their limits are.",
+    "demoBadge": "Demo evaluation",
+    "evaluation": {
+      "title": "Forecast evaluation",
+      "description": "Demand forecast error compared against a seasonal-average baseline.",
+      "badge": "Demo evaluation values",
+      "baseline": "Baseline error",
+      "baselineHint": "Seasonal average baseline",
+      "model": "ML model error",
+      "modelHint": "Demo model",
+      "improvement": "Improvement",
+      "improvementHint": "Relative error reduction",
+      "disclaimer": "These are demo evaluation values from a prototype dataset. They are not production-validated results."
+    },
+    "confidence": {
+      "title": "Confidence levels",
+      "description": "What high, medium and low confidence mean.",
+      "high": {
+        "level": "High",
+        "range": "80–100%",
+        "body": "Several seasons of consistent data and stable weather."
+      },
+      "medium": {
+        "level": "Medium",
+        "range": "60–79%",
+        "body": "Partial data coverage or moderate weather variation."
+      },
+      "low": {
+        "level": "Low",
+        "range": "Below 60%",
+        "body": "Limited history or unusual conditions — treat with caution."
+      },
+      "note": "Confidence decreases when historical data is limited or weather conditions are unusual."
+    },
+    "checklist": {
+      "title": "Responsible AI checklist",
+      "description": "Practices applied across the product.",
+      "sourceBacked": "Source-backed recommendations",
+      "confidenceShown": "Confidence shown with every recommendation",
+      "dataProtected": "Farmer data protected and never shown individually",
+      "noUnsupportedClaims": "No unsupported numeric claims",
+      "humanFinal": "Human decision remains final",
+      "demoLabelled": "Synthetic demo data clearly labeled"
+    },
+    "edgeCases": {
+      "title": "Edge cases",
+      "description": "What happens when the data is not good enough.",
+      "noHistory": {
+        "title": "No historical data",
+        "body": "Confidence drops and the crop is shown as low-evidence."
+      },
+      "noWeather": {
+        "title": "Weather unavailable",
+        "body": "Weather suitability is withheld instead of estimated."
+      },
+      "extremeRain": {
+        "title": "Extreme rainfall",
+        "body": "Scenario warning is shown and risk is raised."
+      },
+      "newDistrict": {
+        "title": "New district",
+        "body": "Nearby district patterns are used, clearly labeled as such."
+      },
+      "noSource": {
+        "title": "No reliable source",
+        "body": "The system declines to answer rather than guessing."
+      },
+      "note": "In all of these cases, KhetiSetu reduces confidence or asks for more information instead of guessing."
+    }
+  },
+  "badges": {
+    "demoData": "Demo data",
+    "unverified": "Unverified source"
+  },
+  "states": {
+    "authErrorTitle": "This endpoint needs an API token",
+    "authErrorReply": "The API replied: {{message}}",
+    "authErrorDetail": "Set <code>VITE_API_TOKEN</code> in this app's <code>.env</code> to a token for an account with the required role, then restart the dev server.",
+    "errorTitle": "Couldn't load this from the API",
+    "errorGeneric": "Something went wrong."
+  },
+  "risk": {
+    "low": "Low risk",
+    "medium": "Medium risk",
+    "high": "High risk"
+  },
+  "confidence": {
+    "label": "Confidence",
+    "aria": "Confidence {{value}} percent",
+    "basis": "Based on: {{basis}}",
+    "note": "Confidence reflects historical data coverage, weather availability and seasonal consistency. It is not a probability of profit."
+  },
+  "opportunity": {
+    "label": "Opportunity",
+    "veryHigh": "Very high opportunity",
+    "high": "High opportunity",
+    "moderate": "Moderate opportunity",
+    "low": "Low opportunity",
+    "aria": "Opportunity score {{value}} out of 100. {{label}}."
+  },
+  "sources": {
+    "title": "Sources",
+    "used": "Sources used",
+    "none": "No source documents are linked to this answer yet.",
+    "fallback": "Source #{{id}}"
+  },
+  "api": {
+    "networkError": "Could not reach the KhetiSetu API at {{url}}. Check that the backend is running and that its CORS_ORIGINS allows this origin.",
+    "requestFailed": "Request failed with status {{status}}"
+  }
+}

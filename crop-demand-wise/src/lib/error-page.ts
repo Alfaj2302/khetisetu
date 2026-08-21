@@ -1,9 +1,17 @@
-export function renderErrorPage(): string {
+import { tFor, type SupportedLanguage } from "./i18n";
+
+/**
+ * Last-resort HTML for an SSR failure, rendered without React — so it reads the
+ * language straight from the request cookie (see `server.ts`) instead of the
+ * i18n provider.
+ */
+export function renderErrorPage(language: SupportedLanguage = "en"): string {
+  const t = tFor(language);
   return `<!doctype html>
-<html lang="en">
+<html lang="${language}">
   <head>
     <meta charset="utf-8" />
-    <title>This page didn't load</title>
+    <title>${t("root.error.title")}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
       body { font: 15px/1.5 system-ui, -apple-system, sans-serif; background: #fafafa; color: #111; display: grid; place-items: center; min-height: 100vh; margin: 0; padding: 1.5rem; }
@@ -18,11 +26,11 @@ export function renderErrorPage(): string {
   </head>
   <body>
     <div class="card">
-      <h1>This page didn't load</h1>
-      <p>Something went wrong on our end. You can try refreshing or head back home.</p>
+      <h1>${t("root.error.title")}</h1>
+      <p>${t("root.error.detail")}</p>
       <div class="actions">
-        <button class="primary" onclick="location.reload()">Try again</button>
-        <a class="secondary" href="/">Go home</a>
+        <button class="primary" onclick="location.reload()">${t("common.tryAgain")}</button>
+        <a class="secondary" href="/">${t("common.goHome")}</a>
       </div>
     </div>
   </body>
