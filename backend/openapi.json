@@ -1,0 +1,2674 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FasalCast / KhetiSetu API",
+    "description": "Farmer recommendation, business dashboard, and RAG endpoints for KhetiSetu.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/db": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health Db",
+        "operationId": "health_db_health_db_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Db Health Db Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Register",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/states": {
+      "get": {
+        "tags": [
+          "reference"
+        ],
+        "summary": "List States",
+        "operationId": "list_states_api_v1_states_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StateOut"
+                  },
+                  "type": "array",
+                  "title": "Response List States Api V1 States Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/districts": {
+      "get": {
+        "tags": [
+          "reference"
+        ],
+        "summary": "List Districts",
+        "operationId": "list_districts_api_v1_districts_get",
+        "parameters": [
+          {
+            "name": "state_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DistrictOut"
+                  },
+                  "title": "Response List Districts Api V1 Districts Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/crops": {
+      "get": {
+        "tags": [
+          "reference"
+        ],
+        "summary": "List Crops",
+        "operationId": "list_crops_api_v1_crops_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CropOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Crops Api V1 Crops Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/seasons": {
+      "get": {
+        "tags": [
+          "reference"
+        ],
+        "summary": "List Seasons",
+        "operationId": "list_seasons_api_v1_seasons_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SeasonOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Seasons Api V1 Seasons Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products": {
+      "get": {
+        "tags": [
+          "reference"
+        ],
+        "summary": "List Products",
+        "operationId": "list_products_api_v1_products_get",
+        "parameters": [
+          {
+            "name": "fertilizer_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fertilizer Type"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductOut"
+                  },
+                  "title": "Response List Products Api V1 Products Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/farmer/crop-recommendation": {
+      "post": {
+        "tags": [
+          "farmer"
+        ],
+        "summary": "Crop Recommendation",
+        "operationId": "crop_recommendation_api_v1_farmer_crop_recommendation_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CropRecommendationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CropRecommendationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/farmer/weather": {
+      "get": {
+        "tags": [
+          "farmer"
+        ],
+        "summary": "Farmer Weather",
+        "operationId": "farmer_weather_api_v1_farmer_weather_get",
+        "parameters": [
+          {
+            "name": "district_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "District Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeatherResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/farmer/crop/{crop_id}": {
+      "get": {
+        "tags": [
+          "farmer"
+        ],
+        "summary": "Crop Detail",
+        "operationId": "crop_detail_api_v1_farmer_crop__crop_id__get",
+        "parameters": [
+          {
+            "name": "crop_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Crop Id"
+            }
+          },
+          {
+            "name": "district_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "District Id"
+            }
+          },
+          {
+            "name": "land_area_acres",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Land Area Acres"
+            }
+          },
+          {
+            "name": "irrigation_available",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Irrigation Available"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CropDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/farmer/scenario": {
+      "post": {
+        "tags": [
+          "farmer"
+        ],
+        "summary": "Scenario",
+        "operationId": "scenario_api_v1_farmer_scenario_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenarioResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/farmer/crop-intent": {
+      "post": {
+        "tags": [
+          "farmer"
+        ],
+        "summary": "Crop Intent",
+        "operationId": "crop_intent_api_v1_farmer_crop_intent_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CropIntentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CropIntentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/business/dashboard": {
+      "get": {
+        "tags": [
+          "business"
+        ],
+        "summary": "Dashboard",
+        "operationId": "dashboard_api_v1_business_dashboard_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "district_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "District Id"
+            }
+          },
+          {
+            "name": "season_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Season Id"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Year"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessDashboardResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/business/forecast": {
+      "get": {
+        "tags": [
+          "business"
+        ],
+        "summary": "Forecast",
+        "operationId": "forecast_api_v1_business_forecast_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "district_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "District Id"
+            }
+          },
+          {
+            "name": "product_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Product Id"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Year"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ForecastItem"
+                  },
+                  "title": "Response Forecast Api V1 Business Forecast Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/business/inventory": {
+      "get": {
+        "tags": [
+          "business"
+        ],
+        "summary": "Inventory",
+        "operationId": "inventory_api_v1_business_inventory_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "district_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "District Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InventoryItem"
+                  },
+                  "title": "Response Inventory Api V1 Business Inventory Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/business/transfers": {
+      "get": {
+        "tags": [
+          "business"
+        ],
+        "summary": "Transfers",
+        "operationId": "transfers_api_v1_business_transfers_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TransferItem"
+                  },
+                  "type": "array",
+                  "title": "Response Transfers Api V1 Business Transfers Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/business/alerts": {
+      "get": {
+        "tags": [
+          "business"
+        ],
+        "summary": "Alerts",
+        "operationId": "alerts_api_v1_business_alerts_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "district_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "District Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AlertItem"
+                  },
+                  "title": "Response Alerts Api V1 Business Alerts Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rag/query": {
+      "post": {
+        "tags": [
+          "rag"
+        ],
+        "summary": "Rag Query",
+        "operationId": "rag_query_api_v1_rag_query_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RagQueryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RagQueryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AgronomicGuidance": {
+        "properties": {
+          "is_verified": {
+            "type": "boolean",
+            "title": "Is Verified"
+          },
+          "warning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warning"
+          },
+          "nitrogen_kg_ha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nitrogen Kg Ha"
+          },
+          "phosphorus_kg_ha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phosphorus Kg Ha"
+          },
+          "potassium_kg_ha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Potassium Kg Ha"
+          },
+          "application_stage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Application Stage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "is_verified",
+          "warning",
+          "nitrogen_kg_ha",
+          "phosphorus_kg_ha",
+          "potassium_kg_ha",
+          "application_stage"
+        ],
+        "title": "AgronomicGuidance"
+      },
+      "AlertItem": {
+        "properties": {
+          "district": {
+            "type": "string",
+            "title": "District"
+          },
+          "product": {
+            "type": "string",
+            "title": "Product"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "district",
+          "product",
+          "severity",
+          "message"
+        ],
+        "title": "AlertItem"
+      },
+      "BusinessDashboardResponse": {
+        "properties": {
+          "season": {
+            "type": "string",
+            "title": "Season"
+          },
+          "expected_input_demand": {
+            "items": {
+              "$ref": "#/components/schemas/InputDemandItem"
+            },
+            "type": "array",
+            "title": "Expected Input Demand"
+          },
+          "farmer_crop_intent": {
+            "items": {
+              "$ref": "#/components/schemas/CropIntentSummaryItem"
+            },
+            "type": "array",
+            "title": "Farmer Crop Intent"
+          },
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/AlertItem"
+            },
+            "type": "array",
+            "title": "Alerts"
+          },
+          "recommended_action": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecommendedAction"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "season",
+          "expected_input_demand",
+          "farmer_crop_intent",
+          "alerts",
+          "recommended_action"
+        ],
+        "title": "BusinessDashboardResponse"
+      },
+      "CropDetailResponse": {
+        "properties": {
+          "crop": {
+            "$ref": "#/components/schemas/CropRef"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Tags"
+          },
+          "opportunity_pct": {
+            "type": "integer",
+            "title": "Opportunity Pct"
+          },
+          "why": {
+            "items": {
+              "$ref": "#/components/schemas/WhyFactor"
+            },
+            "type": "array",
+            "title": "Why"
+          },
+          "demand_outlook": {
+            "$ref": "#/components/schemas/DemandOutlook"
+          },
+          "weather_suitability": {
+            "$ref": "#/components/schemas/WeatherSuitability"
+          },
+          "crop_season": {
+            "$ref": "#/components/schemas/CropSeason"
+          },
+          "agronomic_guidance": {
+            "$ref": "#/components/schemas/AgronomicGuidance"
+          },
+          "risk": {
+            "$ref": "#/components/schemas/RiskInfo"
+          },
+          "confidence_pct": {
+            "type": "integer",
+            "title": "Confidence Pct"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/SourceRef"
+            },
+            "type": "array",
+            "title": "Sources"
+          }
+        },
+        "type": "object",
+        "required": [
+          "crop",
+          "tags",
+          "opportunity_pct",
+          "why",
+          "demand_outlook",
+          "weather_suitability",
+          "crop_season",
+          "agronomic_guidance",
+          "risk",
+          "confidence_pct",
+          "sources"
+        ],
+        "title": "CropDetailResponse"
+      },
+      "CropIntentRequest": {
+        "properties": {
+          "district_id": {
+            "type": "integer",
+            "title": "District Id"
+          },
+          "crop_id": {
+            "type": "integer",
+            "title": "Crop Id"
+          },
+          "season_id": {
+            "type": "integer",
+            "title": "Season Id"
+          },
+          "year": {
+            "type": "integer",
+            "title": "Year"
+          },
+          "land_area_acres": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Land Area Acres"
+          },
+          "irrigation_available": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Irrigation Available"
+          },
+          "soil_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Soil Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "district_id",
+          "crop_id",
+          "season_id",
+          "year"
+        ],
+        "title": "CropIntentRequest"
+      },
+      "CropIntentResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "CropIntentResponse"
+      },
+      "CropIntentSummaryItem": {
+        "properties": {
+          "crop": {
+            "type": "string",
+            "title": "Crop"
+          },
+          "acres": {
+            "type": "number",
+            "title": "Acres"
+          }
+        },
+        "type": "object",
+        "required": [
+          "crop",
+          "acres"
+        ],
+        "title": "CropIntentSummaryItem"
+      },
+      "CropOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "scientific_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scientific Name"
+          },
+          "crop_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Crop Category"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "scientific_name",
+          "crop_category"
+        ],
+        "title": "CropOut"
+      },
+      "CropRecommendationRequest": {
+        "properties": {
+          "district_id": {
+            "type": "integer",
+            "title": "District Id"
+          },
+          "land_area_acres": {
+            "type": "number",
+            "title": "Land Area Acres"
+          },
+          "irrigation_available": {
+            "type": "boolean",
+            "title": "Irrigation Available"
+          },
+          "previous_crop_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Crop Id"
+          },
+          "sowing_month": {
+            "type": "integer",
+            "maximum": 12.0,
+            "minimum": 1.0,
+            "title": "Sowing Month"
+          }
+        },
+        "type": "object",
+        "required": [
+          "district_id",
+          "land_area_acres",
+          "irrigation_available",
+          "sowing_month"
+        ],
+        "title": "CropRecommendationRequest"
+      },
+      "CropRecommendationResponse": {
+        "properties": {
+          "farmer_intent_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Farmer Intent Id"
+          },
+          "district": {
+            "$ref": "#/components/schemas/DistrictRef"
+          },
+          "season_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Season Id"
+          },
+          "recommendations": {
+            "items": {
+              "$ref": "#/components/schemas/RecommendationItem"
+            },
+            "type": "array",
+            "title": "Recommendations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "farmer_intent_id",
+          "district",
+          "season_id",
+          "recommendations"
+        ],
+        "title": "CropRecommendationResponse"
+      },
+      "CropRef": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "CropRef"
+      },
+      "CropSeason": {
+        "properties": {
+          "sowing_months": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Sowing Months"
+          },
+          "growing_period_weeks": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Growing Period Weeks"
+          },
+          "harvest_months": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Harvest Months"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sowing_months",
+          "growing_period_weeks",
+          "harvest_months"
+        ],
+        "title": "CropSeason"
+      },
+      "CurrentWeather": {
+        "properties": {
+          "rainfall": {
+            "type": "string",
+            "title": "Rainfall"
+          },
+          "temperature_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature C"
+          },
+          "humidity_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Humidity Pct"
+          },
+          "forecast": {
+            "type": "string",
+            "title": "Forecast"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rainfall",
+          "temperature_c",
+          "humidity_pct",
+          "forecast"
+        ],
+        "title": "CurrentWeather"
+      },
+      "DemandOutlook": {
+        "properties": {
+          "expected_demand_qty": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Demand Qty"
+          },
+          "expected_supply_qty": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Supply Qty"
+          },
+          "demand_gap": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demand Gap"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected_demand_qty",
+          "expected_supply_qty",
+          "demand_gap"
+        ],
+        "title": "DemandOutlook"
+      },
+      "DistrictOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "state_id": {
+            "type": "integer",
+            "title": "State Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude"
+          },
+          "also_known_as": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Also Known As"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "state_id",
+          "name",
+          "latitude",
+          "longitude",
+          "also_known_as"
+        ],
+        "title": "DistrictOut"
+      },
+      "DistrictRef": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "DistrictRef"
+      },
+      "ForecastDay": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date"
+          },
+          "temperature_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature C"
+          },
+          "rain_probability_pct": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rain Probability Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "temperature_c",
+          "rain_probability_pct"
+        ],
+        "title": "ForecastDay"
+      },
+      "ForecastItem": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "year": {
+            "type": "integer",
+            "title": "Year"
+          },
+          "month": {
+            "type": "integer",
+            "title": "Month"
+          },
+          "predicted_demand": {
+            "type": "number",
+            "title": "Predicted Demand"
+          },
+          "lower_bound": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lower Bound"
+          },
+          "upper_bound": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Upper Bound"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "year",
+          "month",
+          "predicted_demand",
+          "lower_bound",
+          "upper_bound",
+          "confidence",
+          "model_version"
+        ],
+        "title": "ForecastItem"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "InputDemandItem": {
+        "properties": {
+          "product": {
+            "type": "string",
+            "title": "Product"
+          },
+          "quantity_mt": {
+            "type": "number",
+            "title": "Quantity Mt"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product",
+          "quantity_mt"
+        ],
+        "title": "InputDemandItem"
+      },
+      "InventoryItem": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "batch_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Batch No"
+          },
+          "manufacturing_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manufacturing Date"
+          },
+          "expiry_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expiry Date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "quantity",
+          "batch_no",
+          "manufacturing_date",
+          "expiry_date"
+        ],
+        "title": "InventoryItem"
+      },
+      "LoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginRequest"
+      },
+      "LoginResponse": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          },
+          "user": {
+            "$ref": "#/components/schemas/LoginUser"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token",
+          "user"
+        ],
+        "title": "LoginResponse"
+      },
+      "LoginUser": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "FARMER",
+              "AGRI_BUSINESS",
+              "ADMIN"
+            ],
+            "title": "Role"
+          },
+          "district_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "District Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "role",
+          "district_id"
+        ],
+        "title": "LoginUser"
+      },
+      "ProductOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "product_name": {
+            "type": "string",
+            "title": "Product Name"
+          },
+          "product_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Type"
+          },
+          "fertilizer_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fertilizer Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "product_name",
+          "product_type",
+          "fertilizer_type"
+        ],
+        "title": "ProductOut"
+      },
+      "RagQueryRequest": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "explain",
+              "ask"
+            ],
+            "title": "Mode"
+          },
+          "crop_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Crop Id"
+          },
+          "district_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "District Id"
+          },
+          "computed_context": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Computed Context"
+          },
+          "question": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Question"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode"
+        ],
+        "title": "RagQueryRequest"
+      },
+      "RagQueryResponse": {
+        "properties": {
+          "answer": {
+            "type": "string",
+            "title": "Answer"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/RagSourceRef"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "used_placeholder_data": {
+            "type": "boolean",
+            "title": "Used Placeholder Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "answer",
+          "sources",
+          "used_placeholder_data"
+        ],
+        "title": "RagQueryResponse"
+      },
+      "RagSourceRef": {
+        "properties": {
+          "source_id": {
+            "type": "integer",
+            "title": "Source Id"
+          },
+          "organization": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organization"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_id",
+          "organization"
+        ],
+        "title": "RagSourceRef"
+      },
+      "RecommendationItem": {
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          },
+          "crop": {
+            "$ref": "#/components/schemas/CropRef"
+          },
+          "opportunity_pct": {
+            "type": "integer",
+            "title": "Opportunity Pct"
+          },
+          "demand_level": {
+            "type": "string",
+            "enum": [
+              "High",
+              "Medium",
+              "Low"
+            ],
+            "title": "Demand Level"
+          },
+          "weather_tag": {
+            "type": "string",
+            "enum": [
+              "Good",
+              "Moderate",
+              "Poor"
+            ],
+            "title": "Weather Tag"
+          },
+          "risk_tag": {
+            "type": "string",
+            "enum": [
+              "Low",
+              "Medium",
+              "High"
+            ],
+            "title": "Risk Tag"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "expected_demand_qty": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Demand Qty"
+          },
+          "expected_supply_qty": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Supply Qty"
+          },
+          "demand_gap": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demand Gap"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "weather_suitability_score": {
+            "type": "integer",
+            "title": "Weather Suitability Score"
+          },
+          "confidence_pct": {
+            "type": "integer",
+            "title": "Confidence Pct"
+          },
+          "confidence_basis": {
+            "type": "string",
+            "title": "Confidence Basis"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rank",
+          "crop",
+          "opportunity_pct",
+          "demand_level",
+          "weather_tag",
+          "risk_tag",
+          "summary",
+          "expected_demand_qty",
+          "expected_supply_qty",
+          "demand_gap",
+          "unit",
+          "weather_suitability_score",
+          "confidence_pct",
+          "confidence_basis"
+        ],
+        "title": "RecommendationItem"
+      },
+      "RecommendedAction": {
+        "properties": {
+          "product": {
+            "type": "string",
+            "title": "Product"
+          },
+          "forecast_mt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecast Mt"
+          },
+          "current_stock_mt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Stock Mt"
+          },
+          "safety_stock_mt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Safety Stock Mt"
+          },
+          "recommended_dispatch_mt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recommended Dispatch Mt"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product",
+          "forecast_mt",
+          "current_stock_mt",
+          "safety_stock_mt",
+          "recommended_dispatch_mt",
+          "action"
+        ],
+        "title": "RecommendedAction"
+      },
+      "RegisterRequest": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "FARMER",
+              "AGRI_BUSINESS",
+              "ADMIN"
+            ],
+            "title": "Role"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "title": "Password"
+          },
+          "state_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Id"
+          },
+          "district_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "District Id"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "email",
+          "password"
+        ],
+        "title": "RegisterRequest"
+      },
+      "RegisterResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "FARMER",
+              "AGRI_BUSINESS",
+              "ADMIN"
+            ],
+            "title": "Role"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "role",
+          "email"
+        ],
+        "title": "RegisterResponse"
+      },
+      "RiskInfo": {
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": [
+              "Low",
+              "Medium",
+              "High"
+            ],
+            "title": "Level"
+          },
+          "factors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Factors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "level",
+          "factors"
+        ],
+        "title": "RiskInfo"
+      },
+      "ScenarioRequest": {
+        "properties": {
+          "district_id": {
+            "type": "integer",
+            "title": "District Id"
+          },
+          "crop_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Crop Ids"
+          },
+          "rainfall_change_pct": {
+            "type": "number",
+            "title": "Rainfall Change Pct",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "district_id",
+          "crop_ids"
+        ],
+        "title": "ScenarioRequest"
+      },
+      "ScenarioResponse": {
+        "properties": {
+          "rainfall_change_pct": {
+            "type": "number",
+            "title": "Rainfall Change Pct"
+          },
+          "scenario_scores": {
+            "items": {
+              "$ref": "#/components/schemas/ScenarioScore"
+            },
+            "type": "array",
+            "title": "Scenario Scores"
+          },
+          "recommendation_changed": {
+            "type": "boolean",
+            "title": "Recommendation Changed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rainfall_change_pct",
+          "scenario_scores",
+          "recommendation_changed"
+        ],
+        "title": "ScenarioResponse"
+      },
+      "ScenarioScore": {
+        "properties": {
+          "crop_id": {
+            "type": "integer",
+            "title": "Crop Id"
+          },
+          "opportunity_pct": {
+            "type": "integer",
+            "title": "Opportunity Pct"
+          },
+          "change": {
+            "type": "string",
+            "title": "Change"
+          }
+        },
+        "type": "object",
+        "required": [
+          "crop_id",
+          "opportunity_pct",
+          "change"
+        ],
+        "title": "ScenarioScore"
+      },
+      "SeasonOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "start_month": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Month"
+          },
+          "end_month": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Month"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "start_month",
+          "end_month"
+        ],
+        "title": "SeasonOut"
+      },
+      "SourceRef": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "organization": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organization"
+          },
+          "source_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "organization",
+          "source_type"
+        ],
+        "title": "SourceRef"
+      },
+      "StateOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "state_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "state_code"
+        ],
+        "title": "StateOut"
+      },
+      "TransferItem": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "from_district_id": {
+            "type": "integer",
+            "title": "From District Id"
+          },
+          "to_district_id": {
+            "type": "integer",
+            "title": "To District Id"
+          },
+          "recommended_transfer_qty": {
+            "type": "number",
+            "title": "Recommended Transfer Qty"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "from_district_id",
+          "to_district_id",
+          "recommended_transfer_qty",
+          "reason"
+        ],
+        "title": "TransferItem"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WeatherResponse": {
+        "properties": {
+          "district_id": {
+            "type": "integer",
+            "title": "District Id"
+          },
+          "current": {
+            "$ref": "#/components/schemas/CurrentWeather"
+          },
+          "next_7_days": {
+            "items": {
+              "$ref": "#/components/schemas/ForecastDay"
+            },
+            "type": "array",
+            "title": "Next 7 Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "district_id",
+          "current",
+          "next_7_days"
+        ],
+        "title": "WeatherResponse"
+      },
+      "WeatherSuitability": {
+        "properties": {
+          "rainfall": {
+            "type": "string",
+            "title": "Rainfall"
+          },
+          "temperature_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature C"
+          },
+          "humidity_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Humidity Pct"
+          },
+          "score": {
+            "type": "integer",
+            "title": "Score"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rainfall",
+          "temperature_c",
+          "humidity_pct",
+          "score"
+        ],
+        "title": "WeatherSuitability"
+      },
+      "WhyFactor": {
+        "properties": {
+          "factor": {
+            "type": "string",
+            "title": "Factor"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "factor",
+          "detail"
+        ],
+        "title": "WhyFactor"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

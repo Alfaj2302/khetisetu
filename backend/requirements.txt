@@ -1,0 +1,7 @@
+psycopg[binary,pool]>=3.2,<4
+python-dotenv>=1.0,<2
+fastapi>=0.115,<1
+uvicorn[standard]>=0.32,<1
+pydantic[email]>=2.9,<3
+bcrypt>=4.2,<5
+pyjwt>=2.9,<3
