@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import type { RecommendationItem } from "@/services/api";
 import { useCropDetail } from "@/services/queries";
@@ -32,6 +33,7 @@ export function WhyDrawer({
   irrigationAvailable: boolean | null;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const detail = useCropDetail(
     rec ? rec.crop.id : null,
     rec && districtId !== null
@@ -60,25 +62,25 @@ export function WhyDrawer({
     <div className="fixed inset-0 z-50">
       <button
         type="button"
-        aria-label="Close explanation"
+        aria-label={t("whyDrawer.closeExplanation")}
         onClick={onClose}
         className="absolute inset-0 bg-foreground/40 animate-in fade-in"
       />
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={`Why did KhetiSetu recommend ${rec.crop.name}?`}
+        aria-label={t("whyDrawer.title", { crop: rec.crop.name })}
         className="absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto rounded-t-2xl bg-card p-5 shadow-lift animate-in slide-in-from-bottom duration-300 sm:inset-y-0 sm:left-auto sm:right-0 sm:max-h-none sm:w-[460px] sm:rounded-none sm:rounded-l-2xl sm:p-6 sm:slide-in-from-right"
       >
         <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-border sm:hidden" aria-hidden />
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
           <h2 className="text-xl font-bold text-foreground">
-            Why did KhetiSetu recommend {rec.crop.name}?
+            {t("whyDrawer.title", { crop: rec.crop.name })}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t("common.close")}
             className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-muted"
           >
             <X className="h-5 w-5" />
@@ -88,11 +90,11 @@ export function WhyDrawer({
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{rec.summary}</p>
 
         <h3 className="mt-6 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Decision trace
+          {t("whyDrawer.decisionTrace")}
         </h3>
         <div className="mt-3">
           {detail.isPending ? (
-            <LoadingState label="Loading decision trace…" />
+            <LoadingState label={t("whyDrawer.loadingTrace")} />
           ) : detail.isError ? (
             <ErrorState error={detail.error} onRetry={() => void detail.refetch()} />
           ) : (
@@ -113,7 +115,7 @@ export function WhyDrawer({
           <>
             <div className="mt-6 flex items-center justify-between gap-2">
               <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Sources
+                {t("sources.title")}
               </h3>
               {guidance && !guidance.is_verified && <UnverifiedBadge />}
             </div>
@@ -121,7 +123,7 @@ export function WhyDrawer({
               <SourceList
                 sources={detail.data.sources.map((source) => ({
                   id: source.id,
-                  title: source.organization ?? `Source #${source.id}`,
+                  title: source.organization ?? t("sources.fallback", { id: source.id }),
                   detail: source.source_type,
                 }))}
               />
@@ -130,10 +132,7 @@ export function WhyDrawer({
         )}
 
         <div className="mt-6">
-          <Disclaimer>
-            KhetiSetu does not guarantee crop profitability. This ranking is decision support
-            computed from recorded demand, supply and weather data for your district.
-          </Disclaimer>
+          <Disclaimer>{t("whyDrawer.disclaimer")}</Disclaimer>
         </div>
       </div>
     </div>

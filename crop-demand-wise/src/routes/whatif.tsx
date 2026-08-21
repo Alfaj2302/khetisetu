@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { CloudRain, Trophy } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { useScenario } from "@/services/queries";
 import { useFarm } from "@/lib/farm-store";
@@ -11,26 +12,28 @@ import {
   LoadingState,
   Pill,
 } from "@/components/kheti/primitives";
+import { tFor } from "@/lib/i18n";
+import { readLanguage } from "@/lib/i18n/language";
 
 export const Route = createFileRoute("/whatif")({
-  head: () => ({
-    meta: [
-      { title: "Weather what-if scenario | KhetiSetu" },
-      {
-        name: "description",
-        content:
-          "Move the rainfall slider and see how crop opportunity scores and the safest recommendation change.",
-      },
-      { property: "og:title", content: "Weather what-if scenario | KhetiSetu" },
-      { property: "og:description", content: "Simulate rainfall changes on crop suitability." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () => {
+    const t = tFor(readLanguage());
+    return {
+      meta: [
+        { title: t("whatif.meta.title") },
+        { name: "description", content: t("whatif.meta.description") },
+        { property: "og:title", content: t("whatif.meta.ogTitle") },
+        { property: "og:description", content: t("whatif.meta.ogDescription") },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+    };
+  },
   component: WhatIf,
 });
 
 function WhatIf() {
+  const { t } = useTranslation();
   const { recommendation } = useFarm();
   const [delta, setDelta] = useState(0);
 
@@ -53,14 +56,14 @@ function WhatIf() {
     return (
       <div className="mx-auto max-w-3xl px-4 py-12 md:px-6">
         <EmptyState
-          title="Analyse your farm first"
-          detail="The scenario runs against the crops KhetiSetu ranked for your district, so it needs a recommendation to work from."
+          title={t("whatif.emptyTitle")}
+          detail={t("whatif.emptyDetail")}
           action={
             <Link
               to="/farmer"
               className="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-dark"
             >
-              Analyse my farm
+              {t("common.analyseMyFarm")}
             </Link>
           }
         />
@@ -70,7 +73,7 @@ function WhatIf() {
 
   const cropName = (cropId: number) =>
     recommendation.recommendations.find((rec) => rec.crop.id === cropId)?.crop.name ??
-    `Crop #${cropId}`;
+    t("whatif.cropFallback", { id: cropId });
 
   // The API returns scores in the order crop_ids was sent; rank them here.
   const ranked = [...(scenario.data?.scenario_scores ?? [])].sort(
@@ -81,25 +84,22 @@ function WhatIf() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 md:px-6 md:py-12">
       <div className="min-w-0">
-        <h1 className="text-2xl font-extrabold text-foreground md:text-3xl">
-          What if the weather changes?
-        </h1>
+        <h1 className="text-2xl font-extrabold text-foreground md:text-3xl">{t("whatif.title")}</h1>
         <p className="mt-2 text-muted-foreground">
-          Adjust expected rainfall for {recommendation.district.name} and see how crop opportunity
-          scores respond.
+          {t("whatif.subtitle", { district: recommendation.district.name })}
         </p>
       </div>
 
       <section className="surface-card mt-6 p-5 md:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <span className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
-            <CloudRain className="h-4 w-4 text-info" aria-hidden /> Expected rainfall
+            <CloudRain className="h-4 w-4 text-info" aria-hidden /> {t("whatif.expectedRainfall")}
           </span>
           <span className="text-2xl font-extrabold text-foreground">{100 + delta}%</span>
         </div>
 
         <label htmlFor="rainfall" className="mt-4 block text-sm font-semibold text-foreground">
-          Rainfall change vs normal
+          {t("whatif.sliderLabel")}
         </label>
         <input
           id="rainfall"
@@ -109,12 +109,14 @@ function WhatIf() {
           step={5}
           value={delta}
           onChange={(e) => setDelta(Number(e.target.value))}
-          aria-valuetext={`${delta > 0 ? "+" : ""}${delta} percent rainfall`}
+          aria-valuetext={t("whatif.sliderValueText", {
+            delta: `${delta > 0 ? "+" : ""}${delta}`,
+          })}
           className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-[var(--color-primary)]"
         />
         <div className="mt-2 flex justify-between text-xs font-medium text-muted-foreground">
           <span>-30%</span>
-          <span>Normal</span>
+          <span>{t("whatif.normal")}</span>
           <span>+30%</span>
         </div>
 
@@ -130,17 +132,17 @@ function WhatIf() {
                   : "border-border bg-card text-muted-foreground hover:bg-muted"
               }`}
             >
-              {value > 0 ? `+${value}%` : value === 0 ? "Normal" : `${value}%`}
+              {value > 0 ? `+${value}%` : value === 0 ? t("whatif.normal") : `${value}%`}
             </button>
           ))}
         </div>
       </section>
 
       <section className="mt-6 space-y-3" aria-live="polite" aria-busy={scenario.isFetching}>
-        <h2 className="text-lg font-bold text-foreground">Opportunity scores in this scenario</h2>
+        <h2 className="text-lg font-bold text-foreground">{t("whatif.scoresHeading")}</h2>
 
         {scenario.isPending ? (
-          <LoadingState label="Running scenario…" />
+          <LoadingState label={t("whatif.running")} />
         ) : scenario.isError ? (
           <ErrorState error={scenario.error} onRetry={() => void scenario.refetch()} />
         ) : (
@@ -160,7 +162,7 @@ function WhatIf() {
                       </h3>
                       {i === 0 && scenario.data?.recommendation_changed && (
                         <Pill tone="harvest" icon={Trophy}>
-                          New safer option
+                          {t("whatif.newSaferOption")}
                         </Pill>
                       )}
                     </div>
@@ -203,30 +205,32 @@ function WhatIf() {
           <h2 className="flex items-center gap-2 text-base font-bold text-foreground">
             <Trophy className="h-5 w-5 text-harvest" aria-hidden />
             {scenario.data.recommendation_changed
-              ? "Recommendation changed"
-              : "Recommendation unchanged"}
+              ? t("whatif.changedTitle")
+              : t("whatif.unchangedTitle")}
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-foreground">
             {scenario.data.recommendation_changed
-              ? `Under a ${delta > 0 ? "+" : ""}${delta}% rainfall change, ${cropName(leader.crop_id)} scores highest — a different crop than the baseline ranking.`
-              : `${cropName(leader.crop_id)} still leads under a ${delta > 0 ? "+" : ""}${delta}% rainfall change.`}
+              ? t("whatif.changedDetail", {
+                  delta: `${delta > 0 ? "+" : ""}${delta}`,
+                  crop: cropName(leader.crop_id),
+                })
+              : t("whatif.unchangedDetail", {
+                  delta: `${delta > 0 ? "+" : ""}${delta}`,
+                  crop: cropName(leader.crop_id),
+                })}
           </p>
           <Link
             to="/crop/$cropId"
             params={{ cropId: String(leader.crop_id) }}
             className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-dark sm:w-auto"
           >
-            View {cropName(leader.crop_id)} crop plan
+            {t("whatif.viewPlan", { crop: cropName(leader.crop_id) })}
           </Link>
         </section>
       )}
 
       <div className="mt-6">
-        <Disclaimer>
-          The scenario rescales recorded rainfall for your district and re-scores weather
-          suitability. It does not model soil, variety or field management, which also change how a
-          crop responds to rainfall.
-        </Disclaimer>
+        <Disclaimer>{t("whatif.disclaimer")}</Disclaimer>
       </div>
     </div>
   );
