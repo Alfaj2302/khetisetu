@@ -39,7 +39,10 @@ def get_expected_input_demand(cur: Cursor, district_id: int, year: int) -> list[
         """,
         (district_id, year),
     )
-    return [{"product": r[0], "quantity_mt": float(r[1])} for r in cur.fetchall()]
+    # Unit is PACKETS, matching historical_sales.qty_in_pkts, which is what the
+    # model is trained on. This field used to be called quantity_mt, which was
+    # simply wrong - nothing in the pipeline produces metric tons.
+    return [{"product": r[0], "quantity": float(r[1]), "unit": "packets"} for r in cur.fetchall()]
 
 
 def get_farmer_crop_intent_summary(
@@ -81,11 +84,12 @@ def get_recommended_action(cur: Cursor, district_id: int) -> dict[str, Any] | No
     product, forecast_qty, current_stock, safety_stock, dispatch, action = row
     return {
         "product": product,
-        "forecast_mt": float(forecast_qty) if forecast_qty is not None else None,
-        "current_stock_mt": float(current_stock) if current_stock is not None else None,
-        "safety_stock_mt": float(safety_stock) if safety_stock is not None else None,
-        "recommended_dispatch_mt": float(dispatch) if dispatch is not None else None,
+        "forecast": float(forecast_qty) if forecast_qty is not None else None,
+        "current_stock": float(current_stock) if current_stock is not None else None,
+        "safety_stock": float(safety_stock) if safety_stock is not None else None,
+        "recommended_dispatch": float(dispatch) if dispatch is not None else None,
         "action": action,
+        "unit": "packets",
     }
 
 

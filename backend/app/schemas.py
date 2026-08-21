@@ -99,6 +99,19 @@ class CropRecommendationRequest(BaseModel):
     sowing_month: Month
 
 
+class ScoreComponents(BaseModel):
+    """The four terms behind opportunity_pct, each 0-100.
+
+    Exposed so the UI can show a farmer WHY a crop scored what it did, instead
+    of one opaque percentage. `weights` on the parent says how they combine.
+    """
+
+    weather_fit: float
+    demand_supply: float
+    demand_trend: float
+    stability: float
+
+
 class DistrictRef(BaseModel):
     id: int
     name: str
@@ -124,6 +137,9 @@ class RecommendationItem(BaseModel):
     weather_suitability_score: int
     confidence_pct: int
     confidence_basis: str
+    components: ScoreComponents
+    component_notes: dict[str, str]
+    weights: dict[str, float]
 
 
 class CropRecommendationResponse(BaseModel):
@@ -131,6 +147,9 @@ class CropRecommendationResponse(BaseModel):
     district: DistrictRef
     season_id: int | None
     recommendations: list[RecommendationItem]
+    # Set only when `recommendations` is empty, to say why. Optional so every
+    # existing caller keeps working unchanged.
+    notice: str | None = None
 
 
 # ---------------------------------------------------------------
@@ -218,6 +237,12 @@ class CropDetailResponse(BaseModel):
     risk: RiskInfo
     confidence_pct: int
     sources: list[SourceRef]
+    components: ScoreComponents
+    component_notes: dict[str, str]
+    weights: dict[str, float]
+    # Which month the score was computed for. Callers that pass sowing_month get
+    # it back; callers that don't can see which month was assumed.
+    reference_month: int
 
 
 # ---------------------------------------------------------------
@@ -235,6 +260,10 @@ class ScenarioScore(BaseModel):
     crop_id: int
     opportunity_pct: int
     change: str
+    baseline_opportunity_pct: int
+    # weather_fit is the only term rainfall moves, so surfacing it explains the
+    # delta rather than leaving the farmer to trust it.
+    weather_fit: float
 
 
 class ScenarioResponse(BaseModel):
@@ -269,7 +298,8 @@ class CropIntentResponse(BaseModel):
 
 class InputDemandItem(BaseModel):
     product: str
-    quantity_mt: float
+    quantity: float
+    unit: str  # "packets" - the forecast's native unit, not metric tons
 
 
 class CropIntentSummaryItem(BaseModel):
@@ -285,12 +315,17 @@ class AlertItem(BaseModel):
 
 
 class RecommendedAction(BaseModel):
+    # These were forecast_mt / current_stock_mt / etc. Nothing in the pipeline
+    # produces metric tons - the model is trained on historical_sales.qty_in_pkts
+    # and `recommendations` stores packets - so the _mt suffix was a 1000x
+    # mislabel on a dispatch decision. `unit` now states it explicitly.
     product: str
-    forecast_mt: float | None
-    current_stock_mt: float | None
-    safety_stock_mt: float | None
-    recommended_dispatch_mt: float | None
+    forecast: float | None
+    current_stock: float | None
+    safety_stock: float | None
+    recommended_dispatch: float | None
     action: str
+    unit: str
 
 
 class BusinessDashboardResponse(BaseModel):

@@ -230,7 +230,8 @@ export interface CropIntentResponse {
 
 export interface InputDemandItem {
   product: string;
-  quantity_mt: number;
+  quantity: number;
+  unit: string;
 }
 
 export interface CropIntentSummaryItem {
@@ -247,10 +248,11 @@ export interface AlertItem {
 
 export interface RecommendedAction {
   product: string;
-  forecast_mt: number | null;
-  current_stock_mt: number | null;
-  safety_stock_mt: number | null;
-  recommended_dispatch_mt: number | null;
+  forecast: number | null;
+  current_stock: number | null;
+  safety_stock: number | null;
+  recommended_dispatch: number | null;
+  unit: string;
   action: string;
 }
 

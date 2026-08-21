@@ -33,3 +33,10 @@ Thumbs.db
 !.vscode/extensions.json
 .idea/
 *.swp
+
+# Trained model artifacts (regenerate with backend/ml/train.py)
+backend/ml/artifacts/
+
+# Nightly batch logs and lock
+backend/ml/logs/
+backend/ml/.nightly.lock
