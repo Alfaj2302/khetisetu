@@ -1,11 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { CalendarDays, Droplets, MapPin, MessageCircle, Ruler, Wheat } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import type { RecommendationItem } from "@/services/api";
 import { useCrops, useWeather } from "@/services/queries";
 import { useFarm } from "@/lib/farm-store";
 import { monthLabel } from "@/lib/format";
+import { tFor } from "@/lib/i18n";
+import { readLanguage } from "@/lib/i18n/language";
 import { CropRecommendationCard } from "@/components/kheti/CropRecommendationCard";
 import { WhyDrawer } from "@/components/kheti/WhyDrawer";
 import { WeatherOutlookCard } from "@/components/kheti/WeatherOutlookCard";
@@ -19,20 +22,19 @@ import {
 } from "@/components/kheti/primitives";
 
 export const Route = createFileRoute("/recommendations")({
-  head: () => ({
-    meta: [
-      { title: "Your crop opportunities | KhetiSetu" },
-      {
-        name: "description",
-        content:
-          "Top crop opportunities for your farm, with demand gap, weather suitability, risk and confidence.",
-      },
-      { property: "og:title", content: "Your crop opportunities | KhetiSetu" },
-      { property: "og:description", content: "Ranked crop opportunities with explanations." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () => {
+    const t = tFor(readLanguage());
+    return {
+      meta: [
+        { title: t("recommendations.meta.title") },
+        { name: "description", content: t("recommendations.meta.description") },
+        { property: "og:title", content: t("recommendations.meta.ogTitle") },
+        { property: "og:description", content: t("recommendations.meta.ogDescription") },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+    };
+  },
   component: Recommendations,
 });
 
@@ -56,6 +58,7 @@ function toChartRows(recommendations: RecommendationItem[]): DemandSupplyRow[] {
 }
 
 function Recommendations() {
+  const { t } = useTranslation();
   const { farmer, recommendation } = useFarm();
   const [why, setWhy] = useState<RecommendationItem | null>(null);
   const crops = useCrops();
@@ -67,14 +70,14 @@ function Recommendations() {
     return (
       <div className="mx-auto max-w-3xl px-4 py-12 md:px-6">
         <EmptyState
-          title="No analysis yet"
-          detail="Tell KhetiSetu about your farm and it will rank the crops that are eligible for your district and sowing month."
+          title={t("recommendations.empty.title")}
+          detail={t("recommendations.empty.detail")}
           action={
             <Link
               to="/farmer"
               className="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-dark"
             >
-              Analyse my farm
+              {t("common.analyseMyFarm")}
             </Link>
           }
         />
@@ -84,25 +87,38 @@ function Recommendations() {
 
   const previousCropName = crops.data?.find((c) => c.id === farmer.previousCropId)?.name;
   const chartRows = toChartRows(recommendation.recommendations);
-  const unit = recommendation.recommendations.find((r) => r.unit)?.unit ?? "units";
+  const unit = recommendation.recommendations.find((r) => r.unit)?.unit ?? t("format.units");
 
   const context = [
     { icon: MapPin, text: recommendation.district.name },
-    { icon: Ruler, text: `${farmer.landAcres} acres` },
-    { icon: Droplets, text: farmer.irrigation ? "Irrigation available" : "No irrigation" },
-    ...(previousCropName ? [{ icon: Wheat, text: `Previous crop: ${previousCropName}` }] : []),
-    { icon: CalendarDays, text: `Sowing: ${monthLabel(farmer.sowingMonth)}` },
+    { icon: Ruler, text: t("common.acres", { value: farmer.landAcres }) },
+    {
+      icon: Droplets,
+      text: farmer.irrigation
+        ? t("recommendations.context.irrigationAvailable")
+        : t("recommendations.context.noIrrigation"),
+    },
+    ...(previousCropName
+      ? [
+          {
+            icon: Wheat,
+            text: t("recommendations.context.previousCrop", { crop: previousCropName }),
+          },
+        ]
+      : []),
+    {
+      icon: CalendarDays,
+      text: t("recommendations.context.sowing", { month: monthLabel(t, farmer.sowingMonth) }),
+    },
   ];
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-12">
       <div className="min-w-0">
         <h1 className="text-2xl font-extrabold text-foreground md:text-3xl">
-          Your Crop Opportunities
+          {t("recommendations.title")}
         </h1>
-        <p className="mt-2 text-muted-foreground">
-          Based on your location, season, weather and recorded demand.
-        </p>
+        <p className="mt-2 text-muted-foreground">{t("recommendations.subtitle")}</p>
       </div>
 
       <ul className="mt-5 flex flex-wrap gap-2">
@@ -120,7 +136,7 @@ function Recommendations() {
             to="/farmer"
             className="inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold text-primary underline underline-offset-4"
           >
-            Change details
+            {t("recommendations.changeDetails")}
           </Link>
         </li>
       </ul>
@@ -128,14 +144,17 @@ function Recommendations() {
       {recommendation.recommendations.length === 0 ? (
         <div className="mt-8">
           <EmptyState
-            title="No crops are eligible for this district and month"
-            detail={`The API found no crop calendar entry for ${recommendation.district.name} in ${monthLabel(farmer.sowingMonth)}. Try a different sowing month or district.`}
+            title={t("recommendations.noEligible.title")}
+            detail={t("recommendations.noEligible.detail", {
+              district: recommendation.district.name,
+              month: monthLabel(t, farmer.sowingMonth),
+            })}
             action={
               <Link
                 to="/farmer"
                 className="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-dark"
               >
-                Change my details
+                {t("recommendations.noEligible.action")}
               </Link>
             }
           />
@@ -143,8 +162,7 @@ function Recommendations() {
       ) : (
         <>
           <h2 className="mt-8 text-xl font-bold text-foreground">
-            Top {recommendation.recommendations.length} crop
-            {recommendation.recommendations.length === 1 ? "" : "s"} to consider
+            {t("recommendations.topCrops", { count: recommendation.recommendations.length })}
           </h2>
           <div className="mt-4 space-y-4">
             {recommendation.recommendations.map((rec) => (
@@ -156,38 +174,34 @@ function Recommendations() {
 
       <div className="mt-8 space-y-6">
         <Section
-          title="Demand vs expected supply"
-          description="Positive gap = opportunity. Negative gap = possible oversupply."
+          title={t("recommendations.chart.title")}
+          description={t("recommendations.chart.description")}
         >
           {chartRows.length > 0 ? (
             <DemandSupplyChart data={chartRows} unit={unit} />
           ) : (
             <EmptyState
-              title="No market figures for these crops yet"
-              detail="The API has no demand/supply row for this district and crop combination."
+              title={t("recommendations.chart.emptyTitle")}
+              detail={t("recommendations.chart.emptyDetail")}
             />
           )}
         </Section>
 
         {weather.isPending ? (
-          <LoadingState label="Loading weather outlook…" />
+          <LoadingState label={t("recommendations.weatherLoading")} />
         ) : weather.isError ? (
           <ErrorState error={weather.error} onRetry={() => void weather.refetch()} />
         ) : weather.data ? (
           <WeatherOutlookCard weather={weather.data} districtName={recommendation.district.name} />
         ) : null}
 
-        <Disclaimer>
-          Demand and supply figures come from the API's recorded market data; rows extended by
-          synthetic backfill are marked as such at the source. KhetiSetu provides decision support —
-          the final crop decision remains yours.
-        </Disclaimer>
+        <Disclaimer>{t("recommendations.disclaimer")}</Disclaimer>
 
         <Link
           to="/ask"
           className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/5 px-4 py-3 text-sm font-semibold text-primary hover:bg-primary/10 sm:w-auto"
         >
-          <MessageCircle className="h-4 w-4" aria-hidden /> Ask KhetiSetu about this recommendation
+          <MessageCircle className="h-4 w-4" aria-hidden /> {t("recommendations.askCta")}
         </Link>
       </div>
 

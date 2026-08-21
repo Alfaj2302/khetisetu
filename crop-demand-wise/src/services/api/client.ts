@@ -6,6 +6,8 @@
  * so `ApiError` carries that code/message straight through to the UI instead of
  * each caller re-parsing the body.
  */
+import { tFor } from "@/lib/i18n";
+import { readLanguage } from "@/lib/i18n/language";
 import { API_BASE_URL, API_TOKEN } from "./config";
 
 export interface ApiErrorEnvelope {
@@ -61,7 +63,10 @@ function buildUrl(path: string, query?: QueryParams): string {
 
 async function readError(response: Response): Promise<ApiError> {
   let code = "ERROR";
-  let message = response.statusText || `Request failed with status ${response.status}`;
+  // The API's own `message` is shown as-is; this is only the fallback for a
+  // response that carries no envelope.
+  let message =
+    response.statusText || tFor(readLanguage())("api.requestFailed", { status: response.status });
   try {
     const body = (await response.json()) as Partial<ApiErrorEnvelope>;
     if (body.error?.code) code = body.error.code;
@@ -92,7 +97,7 @@ async function request<T>(method: string, path: string, options: RequestOptions 
     throw new ApiError(
       0,
       "NETWORK_ERROR",
-      `Could not reach the KhetiSetu API at ${API_BASE_URL}. Check that the backend is running and that its CORS_ORIGINS allows this origin.`,
+      tFor(readLanguage())("api.networkError", { url: API_BASE_URL }),
     );
   }
 

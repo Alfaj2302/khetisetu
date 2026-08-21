@@ -1,25 +1,29 @@
 import { Link } from "@tanstack/react-router";
 import { Menu, Sprout, X } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import { Logo } from "./Logo";
 
 const NAV = [
-  { to: "/farmer", label: "Farmer" },
-  { to: "/business", label: "Agri Business" },
-  { to: "/how-it-works", label: "How It Works" },
-  { to: "/reliability", label: "AI Reliability" },
-  { to: "/ask", label: "Ask KhetiSetu" },
+  { to: "/farmer", labelKey: "nav.farmer" },
+  { to: "/business", labelKey: "nav.business" },
+  { to: "/how-it-works", labelKey: "nav.howItWorks" },
+  { to: "/reliability", labelKey: "nav.reliability" },
+  { to: "/ask", labelKey: "nav.ask" },
 ] as const;
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-card/90 backdrop-blur">
       <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 md:px-6">
         <div className="flex min-w-0 items-center gap-6">
           <Logo className="h-9 md:h-11" />
-          <nav aria-label="Main" className="hidden items-center gap-1 lg:flex">
+          <nav aria-label={t("nav.main")} className="hidden items-center gap-1 lg:flex">
             {NAV.map((item) => (
               <Link
                 key={item.to}
@@ -27,25 +31,26 @@ export function SiteHeader() {
                 className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 activeProps={{ className: "bg-muted text-primary" }}
               >
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             ))}
           </nav>
         </div>
 
         <div className="flex items-center gap-2">
+          <LanguageSwitcher />
           <Link
             to="/farmer"
             className="hidden items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-card transition-colors hover:bg-primary-dark active:bg-primary-dark md:inline-flex"
           >
             <Sprout className="h-4 w-4" aria-hidden />
-            Find Best Crops
+            {t("common.findBestCrops")}
           </Link>
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
-            aria-label={open ? "Close menu" : "Open menu"}
+            aria-label={open ? t("nav.closeMenu") : t("nav.openMenu")}
             className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-border text-foreground lg:hidden"
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -54,7 +59,10 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <nav aria-label="Mobile" className="border-t border-border bg-card px-4 py-3 lg:hidden">
+        <nav
+          aria-label={t("nav.mobile")}
+          className="border-t border-border bg-card px-4 py-3 lg:hidden"
+        >
           <ul className="flex flex-col gap-1">
             {NAV.map((item) => (
               <li key={item.to}>
@@ -64,7 +72,7 @@ export function SiteHeader() {
                   className="block rounded-lg px-3 py-3 text-base font-medium text-foreground hover:bg-muted"
                   activeProps={{ className: "bg-muted text-primary" }}
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               </li>
             ))}
@@ -74,7 +82,7 @@ export function SiteHeader() {
                 onClick={() => setOpen(false)}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-base font-semibold text-primary-foreground"
               >
-                <Sprout className="h-4 w-4" aria-hidden /> Find Best Crops
+                <Sprout className="h-4 w-4" aria-hidden /> {t("common.findBestCrops")}
               </Link>
             </li>
           </ul>

@@ -1,8 +1,10 @@
 import { CloudRain, CloudSun, Droplets, Thermometer } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 
 import type { WeatherResponse } from "@/services/api";
 import { formatPct, formatTemp, weekdayLabel } from "@/lib/format";
+import { normalizeLanguage } from "@/lib/i18n";
 import { EmptyState, Section } from "./primitives";
 
 /**
@@ -18,17 +20,27 @@ export function WeatherOutlookCard({
   weather: WeatherResponse;
   districtName: string;
 }) {
+  const { t, i18n } = useTranslation();
+  const language = normalizeLanguage(i18n.language);
   const stats = [
-    { icon: CloudRain, label: "Rainfall", value: weather.current.rainfall },
-    { icon: Thermometer, label: "Temperature", value: formatTemp(weather.current.temperature_c) },
-    { icon: Droplets, label: "Humidity", value: formatPct(weather.current.humidity_pct) },
-    { icon: CloudSun, label: "Forecast", value: weather.current.forecast },
+    { icon: CloudRain, label: t("weather.rainfall"), value: weather.current.rainfall },
+    {
+      icon: Thermometer,
+      label: t("weather.temperature"),
+      value: formatTemp(weather.current.temperature_c),
+    },
+    {
+      icon: Droplets,
+      label: t("weather.humidity"),
+      value: formatPct(weather.current.humidity_pct),
+    },
+    { icon: CloudSun, label: t("weather.forecast"), value: weather.current.forecast },
   ];
 
   return (
     <Section
-      title={`${districtName} weather outlook`}
-      description="Averaged from recorded weather history for your sowing month."
+      title={t("weather.title", { district: districtName })}
+      description={t("weather.description")}
     >
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {stats.map(({ icon: Icon, label, value }) => (
@@ -42,7 +54,7 @@ export function WeatherOutlookCard({
         ))}
       </dl>
 
-      <h3 className="mt-5 text-sm font-semibold text-foreground">Next 7 days</h3>
+      <h3 className="mt-5 text-sm font-semibold text-foreground">{t("weather.next7Days")}</h3>
       {weather.next_7_days.length > 0 ? (
         <ul className="mt-2 flex gap-2 overflow-x-auto pb-2">
           {weather.next_7_days.map((day) => (
@@ -51,23 +63,22 @@ export function WeatherOutlookCard({
               className="min-w-[92px] shrink-0 rounded-lg border border-border bg-card p-3 text-center"
             >
               <p className="text-xs font-semibold text-muted-foreground">
-                {weekdayLabel(day.date)}
+                {weekdayLabel(day.date, language)}
               </p>
               <p className="mt-1 text-lg font-bold text-foreground">
                 {formatTemp(day.temperature_c)}
               </p>
               <p className="mt-1 text-xs text-info">
-                {day.rain_probability_pct === null ? "Rain —" : `Rain ${day.rain_probability_pct}%`}
+                {day.rain_probability_pct === null
+                  ? t("weather.rainUnknown")
+                  : t("weather.rainChance", { value: day.rain_probability_pct })}
               </p>
             </li>
           ))}
         </ul>
       ) : (
         <div className="mt-2">
-          <EmptyState
-            title="No daily forecast available"
-            detail="Short-range forecasts come from the API's weather_forecast table, which is filled by a live weather integration that isn't connected yet."
-          />
+          <EmptyState title={t("weather.emptyTitle")} detail={t("weather.emptyDetail")} />
         </div>
       )}
 
@@ -75,7 +86,7 @@ export function WeatherOutlookCard({
         to="/whatif"
         className="mt-4 inline-flex w-full items-center justify-center rounded-lg border border-primary/40 bg-primary/5 px-4 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 sm:w-auto"
       >
-        Test weather scenario
+        {t("common.testWeatherScenario")}
       </Link>
     </Section>
   );
