@@ -1346,6 +1346,17 @@
             },
             "type": "array",
             "title": "Recommendations"
+          },
+          "notice": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notice"
           }
         },
         "type": "object",
@@ -1695,15 +1706,20 @@
             "type": "string",
             "title": "Product"
           },
-          "quantity_mt": {
+          "quantity": {
             "type": "number",
-            "title": "Quantity Mt"
+            "title": "Quantity"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
           }
         },
         "type": "object",
         "required": [
           "product",
-          "quantity_mt"
+          "quantity",
+          "unit"
         ],
         "title": "InputDemandItem"
       },
@@ -2120,7 +2136,7 @@
             "type": "string",
             "title": "Product"
           },
-          "forecast_mt": {
+          "forecast": {
             "anyOf": [
               {
                 "type": "number"
@@ -2129,9 +2145,9 @@
                 "type": "null"
               }
             ],
-            "title": "Forecast Mt"
+            "title": "Forecast"
           },
-          "current_stock_mt": {
+          "current_stock": {
             "anyOf": [
               {
                 "type": "number"
@@ -2140,9 +2156,9 @@
                 "type": "null"
               }
             ],
-            "title": "Current Stock Mt"
+            "title": "Current Stock"
           },
-          "safety_stock_mt": {
+          "safety_stock": {
             "anyOf": [
               {
                 "type": "number"
@@ -2151,9 +2167,9 @@
                 "type": "null"
               }
             ],
-            "title": "Safety Stock Mt"
+            "title": "Safety Stock"
           },
-          "recommended_dispatch_mt": {
+          "recommended_dispatch": {
             "anyOf": [
               {
                 "type": "number"
@@ -2162,21 +2178,26 @@
                 "type": "null"
               }
             ],
-            "title": "Recommended Dispatch Mt"
+            "title": "Recommended Dispatch"
           },
           "action": {
             "type": "string",
             "title": "Action"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
           }
         },
         "type": "object",
         "required": [
           "product",
-          "forecast_mt",
-          "current_stock_mt",
-          "safety_stock_mt",
-          "recommended_dispatch_mt",
-          "action"
+          "forecast",
+          "current_stock",
+          "safety_stock",
+          "recommended_dispatch",
+          "action",
+          "unit"
         ],
         "title": "RecommendedAction"
       },

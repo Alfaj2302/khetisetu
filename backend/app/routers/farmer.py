@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from calendar import month_name
 from datetime import date
 
 from fastapi import APIRouter, Depends, Query
@@ -10,6 +11,7 @@ from ..deps import CurrentUser, get_current_user_optional
 from ..errors import ApiError
 from ..schemas import (
     AgronomicGuidance,
+    Month,
     CropDetailResponse,
     CropIntentRequest,
     CropIntentResponse,
@@ -24,6 +26,7 @@ from ..schemas import (
     RecommendationItem,
     RiskInfo,
     ScenarioRequest,
+    ScoreComponents,
     ScenarioResponse,
     ScenarioScore,
     SourceRef,
@@ -63,8 +66,23 @@ def crop_recommendation(
 
     eligible_crops = scoring.get_eligible_crops(cur, district_id, payload.sowing_month)
 
+    # crop_name/crop_category let the scorer pick that crop's own agronomic
+    # band; irrigation_available is the farmer's own input, which is the whole
+    # reason this is a live formula and not a nightly model.
     scored = [
-        (crop, scoring.score_crop(cur, district_id, crop["id"], payload.sowing_month)) for crop in eligible_crops
+        (
+            crop,
+            scoring.score_crop(
+                cur,
+                district_id,
+                crop["id"],
+                payload.sowing_month,
+                crop_name=crop["name"],
+                crop_category=crop["crop_category"],
+                irrigation_available=payload.irrigation_available,
+            ),
+        )
+        for crop in eligible_crops
     ]
     scored.sort(key=lambda item: item[1]["opportunity_pct"], reverse=True)
     top3 = scored[:3]
@@ -85,6 +103,9 @@ def crop_recommendation(
             weather_suitability_score=result["weather_score"],
             confidence_pct=result["confidence_pct"],
             confidence_basis=result["confidence_basis"],
+            components=ScoreComponents(**result["components"]),
+            component_notes=result["component_notes"],
+            weights=result["weights"],
         )
         for rank, (crop, result) in enumerate(top3, start=1)
     ]
@@ -119,11 +140,26 @@ def crop_recommendation(
         )
         farmer_intent_id = cur.fetchone()[0]
 
+    # An empty list is a legitimate answer, not an error — no district has a
+    # crop_calendar entry for March, so a March request matches nothing. But a
+    # bare [] gives the caller nothing to show the farmer, so say why and name
+    # the months that do work.
+    notice: str | None = None
+    if not recommendations:
+        available = scoring.get_district_calendar_months(cur, district_id)
+        notice = f"No crops are recorded as sown in {month_name[payload.sowing_month]} for {district_name}. "
+        notice += (
+            f"The crop calendar for this district covers {', '.join(month_name[m] for m in available)}."
+            if available
+            else "This district has no crop calendar entries yet."
+        )
+
     return CropRecommendationResponse(
         farmer_intent_id=farmer_intent_id,
         district=DistrictRef(id=district_id, name=district_name),
         season_id=season_id,
         recommendations=recommendations,
+        notice=notice,
     )
 
 
@@ -150,7 +186,7 @@ def farmer_weather(district_id: int = Query(...), cur: Cursor = Depends(get_curs
             "humidity_pct": float(humidity_pct) if humidity_pct is not None else None,
             "rainfall_stddev": None,
         }
-        weather_score = scoring.compute_weather_suitability(weather)
+        weather_score = scoring.generic_weather_suitability(weather)
         forecast_label = scoring.FORECAST_LABEL[scoring.weather_tag_from_score(weather_score)]
     else:
         weather = {"rainfall_mm": None, "temperature_c": None, "humidity_pct": None, "rainfall_stddev": None}
@@ -194,15 +230,27 @@ def crop_detail(
     district_id: int = Query(...),
     land_area_acres: float | None = Query(default=None),
     irrigation_available: bool | None = Query(default=None),
+    sowing_month: Month | None = Query(default=None),
     cur: Cursor = Depends(get_cursor),
 ) -> CropDetailResponse:
     crop_id, crop_name, crop_category = _get_crop(cur, crop_id)
     district_id, _district_name = _get_district(cur, district_id)
 
     calendar_months = scoring.get_calendar_months(cur, district_id, crop_id)
-    reference_month = calendar_months[0] if calendar_months else date.today().month
+    # Score against the month the farmer actually asked about. Without this the
+    # detail page silently used calendar_months[0], so the same crop showed one
+    # opportunity score in the recommendation list and a different one here.
+    reference_month = sowing_month or (calendar_months[0] if calendar_months else date.today().month)
 
-    result = scoring.score_crop(cur, district_id, crop_id, reference_month)
+    result = scoring.score_crop(
+        cur,
+        district_id,
+        crop_id,
+        reference_month,
+        crop_name=crop_name,
+        crop_category=crop_category,
+        irrigation_available=irrigation_available,
+    )
 
     cycle_weeks = scoring.crop_cycle_weeks(crop_category)
     source_months = calendar_months or [reference_month]
@@ -313,6 +361,10 @@ def crop_detail(
         risk=RiskInfo(level=result["risk_tag"], factors=scoring.RISK_FACTORS[result["risk_tag"]]),
         confidence_pct=result["confidence_pct"],
         sources=sources,
+        components=ScoreComponents(**result["components"]),
+        component_notes=result["component_notes"],
+        weights=result["weights"],
+        reference_month=reference_month,
     )
 
 
@@ -326,6 +378,10 @@ def scenario(payload: ScenarioRequest, cur: Cursor = Depends(get_cursor)) -> Sce
     if missing:
         raise ApiError(400, "VALIDATION_ERROR", f"unknown crop_id(s): {missing}")
 
+    # Both the baseline and the shifted case go through score_crop. The previous
+    # version maintained a second, simplified scoring path here that ignored the
+    # crop entirely - which is why every crop moved identically and why a -30%
+    # rainfall change produced "No change" across the whole slider range.
     baseline_top: int | None = None
     scenario_top: int | None = None
     best_baseline = -1.0
@@ -336,26 +392,30 @@ def scenario(payload: ScenarioRequest, cur: Cursor = Depends(get_cursor)) -> Sce
         calendar_months = scoring.get_calendar_months(cur, payload.district_id, crop_id)
         month = calendar_months[0] if calendar_months else date.today().month
 
-        weather = scoring.get_weather_aggregate(cur, payload.district_id, month)
-        market = scoring.get_market_data(cur, payload.district_id, crop_id)
-        _, gap_ratio = scoring.demand_level_from_gap(market["demand_gap"], market["expected_demand_qty"])
+        baseline = scoring.score_crop(cur, payload.district_id, crop_id, month)
+        shifted = scoring.score_crop(
+            cur, payload.district_id, crop_id, month,
+            rainfall_change_pct=payload.rainfall_change_pct,
+        )
+        baseline_opportunity = baseline["opportunity_pct"]
+        scenario_opportunity = shifted["opportunity_pct"]
 
-        baseline_score = scoring.compute_weather_suitability(weather)
-        baseline_opportunity = scoring.compute_opportunity_pct(gap_ratio, baseline_score)
         if baseline_opportunity > best_baseline:
             best_baseline, baseline_top = baseline_opportunity, crop_id
-
-        adjusted_weather = dict(weather)
-        if adjusted_weather["rainfall_mm"] is not None:
-            adjusted_weather["rainfall_mm"] *= 1 + payload.rainfall_change_pct / 100
-        scenario_score = scoring.compute_weather_suitability(adjusted_weather)
-        scenario_opportunity = scoring.compute_opportunity_pct(gap_ratio, scenario_score)
         if scenario_opportunity > best_scenario:
             best_scenario, scenario_top = scenario_opportunity, crop_id
 
         delta = scenario_opportunity - baseline_opportunity
         change = "No change" if delta == 0 else (f"+{delta} pts" if delta > 0 else f"{delta} pts")
-        scores.append(ScenarioScore(crop_id=crop_id, opportunity_pct=scenario_opportunity, change=change))
+        scores.append(
+            ScenarioScore(
+                crop_id=crop_id,
+                opportunity_pct=scenario_opportunity,
+                change=change,
+                baseline_opportunity_pct=baseline_opportunity,
+                weather_fit=shifted["components"]["weather_fit"],
+            ),
+        )
 
     return ScenarioResponse(
         rainfall_change_pct=payload.rainfall_change_pct,

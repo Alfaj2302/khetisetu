@@ -193,7 +193,7 @@ function Business() {
                   <Metric
                     key={item.product}
                     label={item.product}
-                    value={`${formatNumber(item.quantity_mt)} MT`}
+                    value={`${formatNumber(item.quantity)} ${item.unit}`}
                   />
                 ))}
               </dl>
@@ -300,22 +300,22 @@ function Business() {
                 <dl className="mt-3 grid gap-3 sm:grid-cols-3">
                   <Metric
                     label="Forecast"
-                    value={`${formatNumber(dashboard.data.recommended_action.forecast_mt)} MT`}
+                    value={`${formatNumber(dashboard.data.recommended_action.forecast)} ${dashboard.data.recommended_action.unit}`}
                   />
                   <Metric
                     label="Current stock"
-                    value={`${formatNumber(dashboard.data.recommended_action.current_stock_mt)} MT`}
+                    value={`${formatNumber(dashboard.data.recommended_action.current_stock)} ${dashboard.data.recommended_action.unit}`}
                   />
                   <Metric
                     label="Safety stock"
-                    value={`${formatNumber(dashboard.data.recommended_action.safety_stock_mt)} MT`}
+                    value={`${formatNumber(dashboard.data.recommended_action.safety_stock)} ${dashboard.data.recommended_action.unit}`}
                   />
                 </dl>
                 <p className="mt-4 flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 text-base font-bold text-primary">
                   <Truck className="h-5 w-5" aria-hidden />
                   {dashboard.data.recommended_action.action}
-                  {dashboard.data.recommended_action.recommended_dispatch_mt !== null &&
-                    ` ${formatNumber(dashboard.data.recommended_action.recommended_dispatch_mt)} MT`}
+                  {dashboard.data.recommended_action.recommended_dispatch !== null &&
+                    ` ${formatNumber(dashboard.data.recommended_action.recommended_dispatch)} ${dashboard.data.recommended_action.unit}`}
                 </p>
               </>
             )}

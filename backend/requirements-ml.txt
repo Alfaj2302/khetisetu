@@ -1,0 +1,8 @@
+# Job 1: nightly fertilizer-demand forecast.
+# Kept separate from requirements.txt so the API container doesn't carry
+# training dependencies it never imports.
+-r requirements.txt
+pandas>=2.2,<3
+numpy>=1.26,<3
+xgboost>=2.1,<4          # 2.0+ needed for objective="reg:quantileerror"
+scikit-learn>=1.5,<2
