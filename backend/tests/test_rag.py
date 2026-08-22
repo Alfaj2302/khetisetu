@@ -52,6 +52,14 @@ def test_rag_ask_mode_requires_question(client, farmer_token):
 
 
 def test_rag_ask_mode_uses_retrieved_chunks_when_present(client, farmer_token, db_conn):
+    """The extractive path: no generation backend, so retrieved text is quoted.
+
+    Verbatim is the correct assertion *here* specifically because conftest
+    disables generation. With a live backend the same question returns a
+    paraphrase ("Urea demand is rising in Nashik because farmers have expanded
+    Kharif sowing") — grounded in the same chunk, but not quoting it. The model
+    path is covered separately in test_rag_pipeline.py against a fake client.
+    """
     with db_conn.cursor() as cur:
         cur.execute(
             """

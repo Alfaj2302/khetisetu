@@ -316,6 +316,25 @@ export interface RagQueryRequest {
 export interface RagSourceRef {
   source_id: number;
   organization: string | null;
+  title?: string | null;
+  url?: string | null;
+  source_type?: string | null;
+  publication_date?: string | null;
+}
+
+/**
+ * A passage that actually supports a claim in the answer.
+ *
+ * Distinct from `sources`: that is what was consulted, this is what was used.
+ * Comes from the Messages API's own citation blocks, so it cannot point at a
+ * passage the model did not cite.
+ */
+export interface RagCitation {
+  source_id: number;
+  chunk_id: number;
+  cited_text?: string | null;
+  page_start?: number | null;
+  page_end?: number | null;
 }
 
 export interface RagQueryResponse {
@@ -326,6 +345,36 @@ export interface RagQueryResponse {
    * `fertilizer_recommendations` row (is_verified = false).
    */
   used_placeholder_data: boolean;
+  citations: RagCitation[];
+  /** False means the answer is a decline, not a thin answer. */
+  grounded: boolean;
+  declined: boolean;
+  /**
+   * Which code path wrote the text — lets the UI tell a missing provider apart
+   * from a weak answer.
+   *   "model"      a generation backend answered, with citations
+   *   "extractive" no backend configured/reachable; passages quoted verbatim
+   *   "template"   explain mode with no matching documents; built from DB columns
+   */
+  generated_by: "model" | "template" | "extractive";
+  /** "vector" | "metadata" | "none" */
+  retrieval: "vector" | "metadata" | "none";
+  /** Crops the question named, in ask mode. Two means it was refused. */
+  crops_detected: { id: number; name: string }[];
+}
+
+export interface RagStatusResponse {
+  chunks: number;
+  chunks_embedded: number;
+  sources_indexed: number;
+  embedding_models_present: number;
+  generation_model: string | null;
+  generation_available: boolean;
+  embedding_model: string | null;
+  embeddings_available: boolean;
+  /** False means citations are verified quotes, not reported by the API. */
+  native_citations: boolean;
+  readiness: string;
 }
 
 /* ---------------- health ---------------- */

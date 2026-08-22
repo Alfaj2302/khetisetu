@@ -460,6 +460,24 @@
               ],
               "title": "Irrigation Available"
             }
+          },
+          {
+            "name": "sowing_month",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 12,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sowing Month"
+            }
           }
         ],
         "responses": {
@@ -919,6 +937,33 @@
           }
         ]
       }
+    },
+    "/api/v1/rag/status": {
+      "get": {
+        "tags": [
+          "rag"
+        ],
+        "summary": "Rag Status",
+        "description": "Whether retrieval and generation are actually live.\n\nWithout this, \"the answer was thin\" has three indistinguishable causes: no\ndocuments ingested, no embeddings key, no generation key.",
+        "operationId": "rag_status_api_v1_rag_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RagStatusResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -1120,6 +1165,27 @@
             },
             "type": "array",
             "title": "Sources"
+          },
+          "components": {
+            "$ref": "#/components/schemas/ScoreComponents"
+          },
+          "component_notes": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Component Notes"
+          },
+          "weights": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Weights"
+          },
+          "reference_month": {
+            "type": "integer",
+            "title": "Reference Month"
           }
         },
         "type": "object",
@@ -1134,7 +1200,11 @@
           "agronomic_guidance",
           "risk",
           "confidence_pct",
-          "sources"
+          "sources",
+          "components",
+          "component_notes",
+          "weights",
+          "reference_month"
         ],
         "title": "CropDetailResponse"
       },
@@ -1385,6 +1455,24 @@
           "name"
         ],
         "title": "CropRef"
+      },
+      "CropRefLite": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "CropRefLite"
       },
       "CropSeason": {
         "properties": {
@@ -1897,6 +1985,58 @@
         ],
         "title": "ProductOut"
       },
+      "RagCitation": {
+        "properties": {
+          "source_id": {
+            "type": "integer",
+            "title": "Source Id"
+          },
+          "chunk_id": {
+            "type": "integer",
+            "title": "Chunk Id"
+          },
+          "cited_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cited Text"
+          },
+          "page_start": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Start"
+          },
+          "page_end": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page End"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_id",
+          "chunk_id"
+        ],
+        "title": "RagCitation",
+        "description": "A passage that actually supports a claim in the answer.\n\nDistinct from `sources`: `sources` is what was consulted, this is what was\nused. Populated from the Messages API's own citation blocks, so it cannot\npoint at a passage the model did not cite."
+      },
       "RagQueryRequest": {
         "properties": {
           "mode": {
@@ -1975,6 +2115,42 @@
           "used_placeholder_data": {
             "type": "boolean",
             "title": "Used Placeholder Data"
+          },
+          "citations": {
+            "items": {
+              "$ref": "#/components/schemas/RagCitation"
+            },
+            "type": "array",
+            "title": "Citations",
+            "default": []
+          },
+          "grounded": {
+            "type": "boolean",
+            "title": "Grounded",
+            "default": false
+          },
+          "declined": {
+            "type": "boolean",
+            "title": "Declined",
+            "default": false
+          },
+          "generated_by": {
+            "type": "string",
+            "title": "Generated By",
+            "default": "template"
+          },
+          "retrieval": {
+            "type": "string",
+            "title": "Retrieval",
+            "default": "none"
+          },
+          "crops_detected": {
+            "items": {
+              "$ref": "#/components/schemas/CropRefLite"
+            },
+            "type": "array",
+            "title": "Crops Detected",
+            "default": []
           }
         },
         "type": "object",
@@ -2001,6 +2177,50 @@
               }
             ],
             "title": "Organization"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "source_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Type"
+          },
+          "publication_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publication Date"
           }
         },
         "type": "object",
@@ -2009,6 +2229,89 @@
           "organization"
         ],
         "title": "RagSourceRef"
+      },
+      "RagStatusResponse": {
+        "properties": {
+          "chunks": {
+            "type": "integer",
+            "title": "Chunks"
+          },
+          "chunks_embedded": {
+            "type": "integer",
+            "title": "Chunks Embedded"
+          },
+          "sources_indexed": {
+            "type": "integer",
+            "title": "Sources Indexed"
+          },
+          "embedding_models_present": {
+            "type": "integer",
+            "title": "Embedding Models Present"
+          },
+          "generation_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generation Model"
+          },
+          "generation_available": {
+            "type": "boolean",
+            "title": "Generation Available"
+          },
+          "embedding_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embedding Model"
+          },
+          "embeddings_available": {
+            "type": "boolean",
+            "title": "Embeddings Available"
+          },
+          "native_citations": {
+            "type": "boolean",
+            "title": "Native Citations",
+            "default": false
+          },
+          "last_generation_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Generation Error"
+          },
+          "readiness": {
+            "type": "string",
+            "title": "Readiness"
+          }
+        },
+        "type": "object",
+        "required": [
+          "chunks",
+          "chunks_embedded",
+          "sources_indexed",
+          "embedding_models_present",
+          "generation_model",
+          "generation_available",
+          "embedding_model",
+          "embeddings_available",
+          "readiness"
+        ],
+        "title": "RagStatusResponse"
       },
       "RecommendationItem": {
         "properties": {
@@ -2109,6 +2412,23 @@
           "confidence_basis": {
             "type": "string",
             "title": "Confidence Basis"
+          },
+          "components": {
+            "$ref": "#/components/schemas/ScoreComponents"
+          },
+          "component_notes": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Component Notes"
+          },
+          "weights": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Weights"
           }
         },
         "type": "object",
@@ -2126,7 +2446,10 @@
           "unit",
           "weather_suitability_score",
           "confidence_pct",
-          "confidence_basis"
+          "confidence_basis",
+          "components",
+          "component_notes",
+          "weights"
         ],
         "title": "RecommendationItem"
       },
@@ -2407,15 +2730,54 @@
           "change": {
             "type": "string",
             "title": "Change"
+          },
+          "baseline_opportunity_pct": {
+            "type": "integer",
+            "title": "Baseline Opportunity Pct"
+          },
+          "weather_fit": {
+            "type": "number",
+            "title": "Weather Fit"
           }
         },
         "type": "object",
         "required": [
           "crop_id",
           "opportunity_pct",
-          "change"
+          "change",
+          "baseline_opportunity_pct",
+          "weather_fit"
         ],
         "title": "ScenarioScore"
+      },
+      "ScoreComponents": {
+        "properties": {
+          "weather_fit": {
+            "type": "number",
+            "title": "Weather Fit"
+          },
+          "demand_supply": {
+            "type": "number",
+            "title": "Demand Supply"
+          },
+          "demand_trend": {
+            "type": "number",
+            "title": "Demand Trend"
+          },
+          "stability": {
+            "type": "number",
+            "title": "Stability"
+          }
+        },
+        "type": "object",
+        "required": [
+          "weather_fit",
+          "demand_supply",
+          "demand_trend",
+          "stability"
+        ],
+        "title": "ScoreComponents",
+        "description": "The four terms behind opportunity_pct, each 0-100.\n\nExposed so the UI can show a farmer WHY a crop scored what it did, instead\nof one opaque percentage. `weights` on the parent says how they combine."
       },
       "SeasonOut": {
         "properties": {

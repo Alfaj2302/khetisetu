@@ -7,20 +7,28 @@ from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
+import threading
+
 from .config import CORS_ORIGINS, DATABASE_URL
 from .db import pool
 from .errors import install_error_handlers
 from .routers import auth, business, farmer, health, rag, reference
+from .services import embeddings
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     if not DATABASE_URL:
         raise RuntimeError(
-            "DATABASE_URL is not set. Copy src/backend/.env.example to "
-            "src/backend/.env and fill in your Postgres credentials.",
+            "DATABASE_URL is not set. Copy backend/.env.example to backend/.env "
+            "and fill in your Postgres credentials.",
         )
     pool.open()
+    # The local embedding model takes ~24s to load. Off the request path, so the
+    # first "Why <crop>?" click does not pay it, and off the boot path in a
+    # daemon thread, so /health answers immediately either way. A RAG question
+    # arriving before it finishes simply blocks on the same lock.
+    threading.Thread(target=embeddings.warm_up, name="embeddings-warmup", daemon=True).start()
     try:
         yield
     finally:

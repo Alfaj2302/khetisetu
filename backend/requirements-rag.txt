@@ -1,0 +1,5 @@
+# RAG ingest only (rag/ingest.py). Kept out of requirements.txt so the API
+# container doesn't carry a PDF parser it never imports at request time -
+# ingest is an offline, run-it-once-per-document job.
+-r requirements.txt
+pypdf>=5.0,<7

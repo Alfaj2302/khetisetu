@@ -210,7 +210,10 @@ function Business() {
                   <Metric
                     key={item.product}
                     label={item.product}
-                    value={t("business.megaTonnes", { value: formatNumber(item.quantity_mt) })}
+                    value={t("business.quantityWithUnit", {
+                      value: formatNumber(item.quantity),
+                      unit: item.unit,
+                    })}
                   />
                 ))}
               </dl>
@@ -328,31 +331,33 @@ function Business() {
                 <dl className="mt-3 grid gap-3 sm:grid-cols-3">
                   <Metric
                     label={t("business.action.forecast")}
-                    value={t("business.megaTonnes", {
-                      value: formatNumber(dashboard.data.recommended_action.forecast_mt),
+                    value={t("business.quantityWithUnit", {
+                      value: formatNumber(dashboard.data.recommended_action.forecast),
+                      unit: dashboard.data.recommended_action.unit,
                     })}
                   />
                   <Metric
                     label={t("business.action.currentStock")}
-                    value={t("business.megaTonnes", {
-                      value: formatNumber(dashboard.data.recommended_action.current_stock_mt),
+                    value={t("business.quantityWithUnit", {
+                      value: formatNumber(dashboard.data.recommended_action.current_stock),
+                      unit: dashboard.data.recommended_action.unit,
                     })}
                   />
                   <Metric
                     label={t("business.action.safetyStock")}
-                    value={t("business.megaTonnes", {
-                      value: formatNumber(dashboard.data.recommended_action.safety_stock_mt),
+                    value={t("business.quantityWithUnit", {
+                      value: formatNumber(dashboard.data.recommended_action.safety_stock),
+                      unit: dashboard.data.recommended_action.unit,
                     })}
                   />
                 </dl>
                 <p className="mt-4 flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 text-base font-bold text-primary">
                   <Truck className="h-5 w-5" aria-hidden />
                   {dashboard.data.recommended_action.action}
-                  {dashboard.data.recommended_action.recommended_dispatch_mt !== null &&
-                    ` ${t("business.megaTonnes", {
-                      value: formatNumber(
-                        dashboard.data.recommended_action.recommended_dispatch_mt,
-                      ),
+                  {dashboard.data.recommended_action.recommended_dispatch !== null &&
+                    ` ${t("business.quantityWithUnit", {
+                      value: formatNumber(dashboard.data.recommended_action.recommended_dispatch),
+                      unit: dashboard.data.recommended_action.unit,
                     })}`}
                 </p>
               </>

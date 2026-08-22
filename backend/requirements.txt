@@ -5,3 +5,19 @@ uvicorn[standard]>=0.32,<1
 pydantic[email]>=2.9,<3
 bcrypt>=4.2,<5
 pyjwt>=2.9,<3
+
+# RAG, request-time.
+#
+# Default stack costs nothing: embeddings run locally via sentence-transformers,
+# and generation goes to an OpenAI-compatible endpoint (Groq's free tier by
+# default, or a local Ollama). The two hosted SDKs stay installed because they
+# are small and RAG_PROVIDER / EMBEDDING_PROVIDER switch to them with no code
+# change.
+#
+# sentence-transformers pulls torch, which is the bulk of the install. Install
+# the CPU-only wheel first to avoid ~2GB of unused CUDA libraries:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+sentence-transformers>=3.0,<7   # local embeddings (default)
+openai>=1.50,<4                 # Groq / Ollama / any compatible endpoint
+anthropic>=0.69,<1              # RAG_PROVIDER=anthropic (native citations)
+voyageai>=0.3,<1                # EMBEDDING_PROVIDER=voyage
