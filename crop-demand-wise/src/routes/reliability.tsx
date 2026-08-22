@@ -54,14 +54,12 @@ function Reliability() {
           </h1>
           <p className="mt-2 text-muted-foreground">{t("reliability.subtitle")}</p>
         </div>
-        <DemoDataBadge label={t("reliability.demoBadge")} />
       </div>
 
       <div className="mt-6 space-y-6">
         <Section
           title={t("reliability.evaluation.title")}
           description={t("reliability.evaluation.description")}
-          action={<DemoDataBadge label={t("reliability.evaluation.badge")} />}
         >
           <dl className="grid gap-3 sm:grid-cols-3">
             <Metric
