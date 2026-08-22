@@ -33,7 +33,18 @@ def test_rag_explain_mode_requires_crop_and_district(client, farmer_token):
     assert resp.json()["error"]["code"] == "VALIDATION_ERROR"
 
 
-def test_rag_ask_mode_with_no_indexed_chunks_declines_rather_than_fabricates(client, farmer_token):
+def test_rag_ask_mode_with_no_indexed_chunks_declines_rather_than_fabricates(
+    client, farmer_token, db_conn,
+):
+    """Empties the corpus inside the test transaction rather than assuming it.
+
+    The earlier version relied on `document_chunks` happening to be empty, and
+    started failing the moment real documents were ingested - the corpus is
+    shared and grows underneath the suite.
+    """
+    with db_conn.cursor() as cur:
+        cur.execute("DELETE FROM document_chunks")
+
     resp = client.post(
         f"{API}/rag/query",
         headers=auth_header(farmer_token),
@@ -44,6 +55,7 @@ def test_rag_ask_mode_with_no_indexed_chunks_declines_rather_than_fabricates(cli
     assert "don't have grounded information" in body["answer"]
     assert body["sources"] == []
     assert body["used_placeholder_data"] is False
+    assert body["declined"] is True
 
 
 def test_rag_ask_mode_requires_question(client, farmer_token):

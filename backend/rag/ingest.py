@@ -214,7 +214,27 @@ def ingest_file(
     path: Path,
     args: argparse.Namespace,
 ) -> tuple[int, int, int]:
-    """Returns (chunks, newly_embedded, reused_vectors)."""
+    """Returns (chunks, newly_embedded, reused_vectors).
+
+    Everything runs in the CALLER's transaction on the CALLER's connection, and
+    this function never commits: `main()` commits once at the end, and tests roll
+    back. That property is load-bearing, and an earlier version broke it by
+    committing mid-way and opening a second connection for the write. Two things
+    followed, both worth recording:
+
+    * the test suite started writing to the real database instead of rolling
+      back, leaving test fixtures in `document_chunks` that real questions then
+      retrieved as though they were a genuine ICAR document;
+    * because those rows persisted between tests, the "refuse to write
+      un-embedded chunks" guard stopped firing - its chunks were already cached,
+      so `needed` was empty - and a document was written with no vectors at all.
+
+    The concern behind that change is real: embedding a large document can leave
+    this connection idle-in-transaction for many minutes, and a tunnelled
+    connection may be dropped meanwhile. That belongs at the connection level -
+    see the keepalive settings in `main()` - not in writing outside the caller's
+    transaction.
+    """
     chunks = chunk_pages(read_pages(path))
     if not chunks:
         print(f"  {path.name}: no usable text after normalisation - skipped")
@@ -250,11 +270,15 @@ def ingest_file(
         needed = [c for c in chunks if c.sha256 not in cached]
         fresh: dict[str, str] = {}
         if needed:
+            # Checked before writing anything: chunks stored without a vector can
+            # only ever be reached by metadata filtering, never by semantic
+            # search, which is a silently degraded corpus rather than an error.
             if not embeddings.available():
                 raise SystemExit(
-                    "VOYAGE_API_KEY is not set. Ingest without embeddings would write "
-                    "chunks that only metadata filtering can ever reach - set the key, "
-                    "or drop --write to inspect the chunking first.",
+                    "No embedding provider is available. Ingest without embeddings "
+                    "would write chunks that only metadata filtering can ever "
+                    "reach - configure EMBEDDING_PROVIDER, or drop --write to "
+                    "inspect the chunking first.",
                 )
             print(f"    embedding {len(needed)} chunk(s) with {EMBEDDING_MODEL} "
                   f"({EMBEDDING_DIM}d); reusing {len(chunks) - len(needed)}")
@@ -316,7 +340,21 @@ def main() -> int:
 
     print(f"{'INGEST' if args.write else 'DRY RUN'}: {len(paths)} document(s)\n")
     totals = [0, 0, 0]
-    with psycopg.connect(DATABASE_URL) as conn:
+    # TCP keepalives, because this connection sits idle-in-transaction for the
+    # whole embedding pass - minutes for a large document on a CPU-only machine.
+    # DATABASE_URL points through an ngrok tunnel, and tunnels, SSH forwards and
+    # cloud load balancers all drop silent connections; without keepalives the
+    # drop only surfaces at the final write, after the expensive work is done.
+    # This is the right layer for that problem: the alternative, committing
+    # mid-way and writing on a second connection, takes the writes outside the
+    # caller's transaction and stops tests being able to roll back.
+    with psycopg.connect(
+        DATABASE_URL,
+        keepalives=1,
+        keepalives_idle=30,
+        keepalives_interval=10,
+        keepalives_count=5,
+    ) as conn:
         for path in paths:
             counts = ingest_file(conn, path, args)
             totals = [a + b for a, b in zip(totals, counts, strict=True)]

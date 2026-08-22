@@ -210,12 +210,45 @@ def test_unchanged_chunks_are_not_re_embedded(db_conn, doc, fake_embedder):
         assert cur.fetchone()[0] == 0, "reused vectors must be carried over, not dropped"
 
 
-def test_write_without_an_embeddings_key_refuses(db_conn, doc, monkeypatch):
+def test_write_without_an_embedding_provider_refuses(db_conn, doc, monkeypatch):
     """Writing un-embedded chunks would put text in the index that only
-    metadata filtering can ever reach - a silently degraded corpus."""
+    metadata filtering can ever reach - a silently degraded corpus.
+
+    Matches on the provider-agnostic wording: the default provider is local and
+    needs no key at all, so the old "VOYAGE_API_KEY" message no longer applies.
+    """
     monkeypatch.setattr(ingest.embeddings, "available", lambda: False)
-    with pytest.raises(SystemExit, match="VOYAGE_API_KEY"):
+    with pytest.raises(SystemExit, match="No embedding provider is available"):
         ingest.ingest_file(db_conn, doc, _args(crop="Cotton"))
+
+
+def test_ingest_never_commits_the_callers_transaction(db_conn, doc, fake_embedder):
+    """The regression that leaked test fixtures into the real corpus.
+
+    `ingest_file` must leave the transaction open for the caller to commit or
+    roll back. When it committed mid-way and wrote on a second connection, the
+    suite started writing for real - and the leftover rows then made the
+    un-embedded-chunk guard stop firing, because their hashes were already
+    cached.
+    """
+    ingest.ingest_file(db_conn, doc, _args(crop="Cotton"))
+
+    # Written and visible inside this transaction...
+    with db_conn.cursor() as cur:
+        cur.execute(
+            "SELECT count(*) FROM document_chunks WHERE source_id = "
+            "(SELECT id FROM sources WHERE organization = 'TEST ORG')",
+        )
+        assert cur.fetchone()[0] >= 2
+
+    # ...but invisible to anyone else, because nothing was committed.
+    import psycopg
+
+    from app.config import DATABASE_URL
+
+    with psycopg.connect(DATABASE_URL) as other, other.cursor() as cur:
+        cur.execute("SELECT count(*) FROM sources WHERE organization = 'TEST ORG'")
+        assert cur.fetchone()[0] == 0, "ingest_file committed - test data escaped into the real corpus"
 
 
 def test_dry_run_touches_neither_the_database_nor_the_embedding_api(db_conn, doc, fake_embedder):
