@@ -1,9 +1,9 @@
 /**
  * GET /api/v1/business/* — agri-business supply planning.
  *
- * The backend gates these on a bearer token whose role is AGRI_BUSINESS or
- * ADMIN. With no VITE_API_TOKEN configured they return 401 and the dashboard
- * says so; nothing else in the app depends on them.
+ * Unauthenticated: the app has no sign-in flow, so these read straight from
+ * the database (see `backend/app/routers/business.py`). Every response is
+ * aggregated or product-level — no per-farmer row is ever exposed.
  *
  * `dashboard.expected_input_demand`, `dashboard.recommended_action`, `forecast`
  * and `alerts` read the batch-ML output tables (`forecast`, `recommendations`),

@@ -372,8 +372,6 @@
     },
     "title": "KhetiSetu — Agri Business",
     "subtitle": "From farmer intent to smart supply planning.",
-    "tokenNoticeTitle": "These panels need an API token with the AGRI_BUSINESS or ADMIN role",
-    "tokenNoticeDetail": "Set <code>VITE_API_TOKEN</code> in this app's <code>.env</code> and restart the dev server. See <path>src/services/README.md</path> for how to mint one.",
     "loading": "Loading dashboard…",
     "demand": {
       "title": "Expected input demand",
