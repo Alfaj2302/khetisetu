@@ -55,7 +55,6 @@ function Landing() {
       <section className="border-b border-border bg-card">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:px-6 md:py-16 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-14 lg:py-20">
           <div className="min-w-0">
-            <DemoDataBadge label={t("home.badge")} />
             <h1 className="mt-4 text-3xl font-extrabold leading-[1.1] text-foreground sm:text-4xl lg:text-5xl">
               {t("home.headlineTop")}
               <br />
