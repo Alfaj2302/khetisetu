@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import { useFarm } from "@/lib/farm-store";
 import { MONTHS } from "@/lib/constants";
-import { monthLabel } from "@/lib/format";
+import { monthLabel, referenceLabel } from "@/lib/format";
 import { tFor } from "@/lib/i18n";
 import { readLanguage } from "@/lib/i18n/language";
 import {
@@ -101,7 +101,9 @@ function FarmerInput() {
           setRecommendation(result);
           if (result.recommendations.length === 0) {
             toast.warning(t("farmer.toast.noCropsTitle"), {
-              description: t("farmer.toast.noCropsDetail", { district: result.district.name }),
+              description: t("farmer.toast.noCropsDetail", {
+                district: referenceLabel(t, "districts", result.district.name),
+              }),
             });
           } else {
             toast.success(t("farmer.toast.successTitle"), {
@@ -194,7 +196,7 @@ function FarmerInput() {
                     >
                       {(states.data ?? []).map((s) => (
                         <option key={s.id} value={s.id}>
-                          {s.name}
+                          {referenceLabel(t, "states", s.name)}
                         </option>
                       ))}
                     </select>
@@ -213,7 +215,7 @@ function FarmerInput() {
                     >
                       {(districts.data ?? []).map((d) => (
                         <option key={d.id} value={d.id}>
-                          {d.name}
+                          {referenceLabel(t, "districts", d.name)}
                           {d.also_known_as ? ` (${d.also_known_as})` : ""}
                         </option>
                       ))}
@@ -223,7 +225,10 @@ function FarmerInput() {
                 {districtName && stateName && (
                   <p className="mt-4 inline-flex items-center gap-2 rounded-lg border border-border bg-muted/60 px-3 py-2 text-sm font-medium text-foreground">
                     <MapPin className="h-4 w-4 text-primary" aria-hidden />
-                    {t("farmer.location.summary", { district: districtName, state: stateName })}
+                    {t("farmer.location.summary", {
+                      district: referenceLabel(t, "districts", districtName),
+                      state: referenceLabel(t, "states", stateName),
+                    })}
                   </p>
                 )}
               </>
@@ -319,7 +324,7 @@ function FarmerInput() {
                   <option value="">{t("farmer.crop.previousNone")}</option>
                   {(crops.data ?? []).map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.name}
+                      {referenceLabel(t, "crops", c.name)}
                     </option>
                   ))}
                 </select>

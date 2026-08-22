@@ -13,7 +13,7 @@ import {
   useProducts,
   useSeasons,
 } from "@/services/queries";
-import { formatNumber, monthLabel } from "@/lib/format";
+import { formatNumber, monthLabel, referenceLabel } from "@/lib/format";
 import {
   Disclaimer,
   EmptyState,
@@ -83,11 +83,14 @@ function Business() {
   const transfers = useBusinessTransfers();
   const alerts = useBusinessAlerts(districtId, ready);
 
-  const productName = (productId: number) =>
-    products.data?.find((p) => p.id === productId)?.product_name ??
-    t("business.productFallback", { id: productId });
-  const districtName = (id: number) =>
-    districts.data?.find((d) => d.id === id)?.name ?? t("business.districtFallback", { id });
+  const productName = (productId: number) => {
+    const name = products.data?.find((p) => p.id === productId)?.product_name;
+    return name ? referenceLabel(t, "products", name) : t("business.productFallback", { id: productId });
+  };
+  const districtName = (id: number) => {
+    const name = districts.data?.find((d) => d.id === id)?.name;
+    return name ? referenceLabel(t, "districts", name) : t("business.districtFallback", { id });
+  };
 
   const panelTitle =
     panel === "forecast"
@@ -110,7 +113,7 @@ function Business() {
         <p className="mt-2 text-muted-foreground">{t("business.subtitle")}</p>
         {dashboard.data && (
           <div className="mt-3">
-            <Pill tone="primary">{dashboard.data.season}</Pill>
+            <Pill tone="primary">{referenceLabel(t, "seasons", dashboard.data.season)}</Pill>
           </div>
         )}
       </div>
@@ -129,7 +132,7 @@ function Business() {
           >
             {(districts.data ?? []).map((d) => (
               <option key={d.id} value={d.id}>
-                {d.name}
+                {referenceLabel(t, "districts", d.name)}
               </option>
             ))}
           </select>
@@ -146,7 +149,7 @@ function Business() {
           >
             {(seasons.data ?? []).map((s) => (
               <option key={s.id} value={s.id}>
-                {s.name}
+                {referenceLabel(t, "seasons", s.name)}
               </option>
             ))}
           </select>

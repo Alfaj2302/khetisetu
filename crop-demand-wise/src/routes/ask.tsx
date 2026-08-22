@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { Send } from "lucide-react";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
-import { ApiError, hasApiToken } from "@/services/api";
+import { ApiError } from "@/services/api";
 import type { RagSourceRef } from "@/services/api";
 import { useRagQueryMutation } from "@/services/queries";
 import { useFarm } from "@/lib/farm-store";
@@ -84,21 +84,6 @@ function Ask() {
         <p className="mt-2 text-muted-foreground">{t("ask.subtitle")}</p>
       </div>
 
-      {!hasApiToken && (
-        <div className="mt-6 rounded-lg border border-warning/40 bg-warning/5 p-4">
-          <p className="text-sm font-semibold text-foreground">{t("ask.tokenNoticeTitle")}</p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            <Trans
-              i18nKey="ask.tokenNoticeDetail"
-              components={{
-                code: <code className="rounded bg-muted px-1 py-0.5 text-xs" />,
-                path: <code className="text-xs" />,
-              }}
-            />
-          </p>
-        </div>
-      )}
-
       <div className="surface-card mt-6 flex flex-col">
         <ul className="space-y-5 p-4 md:p-6">
           {messages.map((message) =>
@@ -146,7 +131,7 @@ function Ask() {
               {t("ask.searching")}
             </li>
           )}
-          {ragQuery.isError && (
+          {ragQuery.isError && !(ragQuery.error instanceof ApiError && ragQuery.error.isAuthError) && (
             <li>
               <ErrorState
                 error={
@@ -208,9 +193,9 @@ function Ask() {
         </div>
       </div>
 
-      <div className="mt-4">
+      {/* <div className="mt-4">
         <Disclaimer>{t("ask.disclaimer")}</Disclaimer>
-      </div>
+      </div> */}
     </div>
   );
 }

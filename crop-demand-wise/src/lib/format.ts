@@ -60,6 +60,29 @@ export function monthLabel(t: TFunction, month: number): string {
   return key ? t(key) : String(month);
 }
 
+/**
+ * Reference lookup tables (states, districts, crops, seasons, products) are
+ * API-backed: the API returns English `name`/`product_name` values with no
+ * translation of its own, and the `id` a farmer picks has to reach the API
+ * unchanged. So translation is a display-only overlay here, keyed by the
+ * API's own name string with a locale entry under `referenceData.<category>`
+ * — same shape as `MONTH_KEYS`, just keyed by name instead of by index.
+ *
+ * A name with no matching entry (an untranslated product brand, a district
+ * not yet added to the locale files) falls back to the raw API value rather
+ * than showing a missing-translation placeholder.
+ */
+export type ReferenceCategory = "states" | "districts" | "crops" | "seasons" | "products";
+
+export function referenceLabel(
+  t: TFunction,
+  category: ReferenceCategory,
+  name: string | null | undefined,
+): string {
+  if (!name) return "";
+  return t(`referenceData.${category}.${name}`, { defaultValue: name });
+}
+
 /** "June", "June–July", or "June, August, October" for a set of month numbers. */
 export function monthRangeLabel(t: TFunction, months: number[]): string {
   if (months.length === 0) return t("common.notAvailable");
