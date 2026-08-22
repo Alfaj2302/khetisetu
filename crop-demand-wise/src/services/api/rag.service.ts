@@ -3,19 +3,29 @@
  *
  * The backend requires a bearer token here, so this needs VITE_API_TOKEN set.
  *
- * There is no LLM behind it: "explain" builds its answer from real
- * `crop_market_data` rows plus the caller's `computed_context`, and "ask" does a
- * metadata-filtered lookup over `document_chunks` and declines outright when
- * nothing matches. An "I don't have grounded information" answer is the API
- * working as designed, not a failure.
+ * Claude writes the answer, but only from documents retrieved for that specific
+ * crop, and the API discards any answer that cites none of them. So a response
+ * with `declined: true` and "I don't have grounded information" is the feature
+ * working as designed, not a failure — surface it, don't retry it.
+ *
+ * `generated_by` says which path produced the text:
+ *   "claude"     — retrieved documents, explained by the model, with citations
+ *   "extractive" — no ANTHROPIC_API_KEY, so retrieved passages are quoted as-is
+ *   "template"   — explain mode with no matching documents; the answer is built
+ *                  from database columns (market rows, computed score) instead
+ *
+ * GET /api/v1/rag/status reports which of those is live and whether any corpus
+ * has been ingested — check it before concluding an answer is bad.
  */
 import { apiClient } from "./client";
 import { API_V1 } from "./config";
-import type { RagQueryRequest, RagQueryResponse } from "./types";
+import type { RagQueryRequest, RagQueryResponse, RagStatusResponse } from "./types";
 
 export const ragService = {
   query: (payload: RagQueryRequest) =>
     apiClient.post<RagQueryResponse>(`${API_V1}/rag/query`, payload),
+
+  status: () => apiClient.get<RagStatusResponse>(`${API_V1}/rag/status`),
 
   explain: (args: {
     cropId: number;
