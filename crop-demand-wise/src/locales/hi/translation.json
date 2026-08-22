@@ -375,8 +375,6 @@
     },
     "title": "KhetiSetu — एग्री बिज़नेस",
     "subtitle": "किसान की योजना से स्मार्ट सप्लाई प्लानिंग तक।",
-    "tokenNoticeTitle": "इन पैनल के लिए AGRI_BUSINESS या ADMIN भूमिका वाला API टोकन ज़रूरी है",
-    "tokenNoticeDetail": "इस ऐप की <code>.env</code> में <code>VITE_API_TOKEN</code> सेट करें और dev सर्वर फिर चालू करें। टोकन बनाने का तरीका <path>src/services/README.md</path> में देखें।",
     "loading": "डैशबोर्ड लोड हो रहा है…",
     "demand": {
       "title": "अपेक्षित इनपुट मांग",

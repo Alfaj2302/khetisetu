@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { AlertTriangle, CircleAlert, Truck, X } from "lucide-react";
 import { Trans, useTranslation } from "react-i18next";
 
-import { hasApiToken } from "@/services/api";
 import {
   useBusinessAlerts,
   useBusinessDashboard,
@@ -115,21 +114,6 @@ function Business() {
           </div>
         )}
       </div>
-
-      {!hasApiToken && (
-        <div className="mt-6 rounded-lg border border-warning/40 bg-warning/5 p-4">
-          <p className="text-sm font-semibold text-foreground">{t("business.tokenNoticeTitle")}</p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            <Trans
-              i18nKey="business.tokenNoticeDetail"
-              components={{
-                code: <code className="rounded bg-muted px-1 py-0.5 text-xs" />,
-                path: <code className="text-xs" />,
-              }}
-            />
-          </p>
-        </div>
-      )}
 
       {/* Scope selectors */}
       <div className="surface-card mt-6 grid gap-4 p-4 sm:grid-cols-3 md:p-5">

@@ -101,11 +101,12 @@ def test_stale_user_token_is_401_not_500_on_optional_auth_route(client):
 
 
 def test_stale_user_token_is_401_not_500_on_required_auth_route(client):
+    # /rag/query is the route that still requires auth; /business/* is open.
     token = create_access_token(user_id=999_999_999, role="AGRI_BUSINESS", district_id=None)
-    resp = client.get(
-        f"{API}/business/dashboard",
-        params={"district_id": 1, "season_id": 1, "year": 2026},
+    resp = client.post(
+        f"{API}/rag/query",
         headers=auth_header(token),
+        json={"mode": "ask", "question": "when should I sow cotton?"},
     )
     assert resp.status_code == 401
     assert resp.json()["error"]["code"] == "UNAUTHORIZED"

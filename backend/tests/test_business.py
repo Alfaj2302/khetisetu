@@ -1,11 +1,13 @@
 """Business endpoints.
 
-All require role AGRI_BUSINESS/ADMIN (tested once here and assumed for the
-rest). `forecast`/`recommendations` are batch-ML-job output tables that are
-empty in a freshly-seeded dev database, so most of these tests seed a
-throwaway row directly (inside the same per-test transaction, rolled back
-at teardown) to exercise the actual filter logic rather than just asserting
-on an empty list.
+These are unauthenticated — the app has no sign-in flow, so the dashboard
+reads them straight from the database (see the note on the router). Every
+response is aggregated or product-level, never per-farmer.
+
+`forecast`/`recommendations` are batch-ML-job output tables that are empty in
+a freshly-seeded dev database, so most of these tests seed a throwaway row
+directly (inside the same per-test transaction, rolled back at teardown) to
+exercise the actual filter logic rather than just asserting on an empty list.
 """
 
 from __future__ import annotations
@@ -13,70 +15,52 @@ from __future__ import annotations
 API = "/api/v1"
 
 
-def auth_header(token: str) -> dict[str, str]:
-    return {"Authorization": f"Bearer {token}"}
-
-
 # ---------------------------------------------------------------
-# Role enforcement (checked once; every other route in this router
-# shares the same `require_roles("AGRI_BUSINESS", "ADMIN")` dependency)
+# Open access (checked once; no route in this router is gated)
 # ---------------------------------------------------------------
 
 
-def test_dashboard_requires_a_token(client):
+def test_dashboard_needs_no_token(client):
     resp = client.get(f"{API}/business/dashboard", params={"district_id": 1, "season_id": 1, "year": 2026})
-    assert resp.status_code == 401
-    assert resp.json()["error"]["code"] == "UNAUTHORIZED"
+    assert resp.status_code == 200
 
 
-def test_dashboard_rejects_farmer_role(client, farmer_token):
+def test_dashboard_ignores_a_farmer_role_token(client, farmer_token):
+    # Nothing here is role-gated any more, so a token of any role — or none —
+    # gets the same response rather than a 403.
     resp = client.get(
         f"{API}/business/dashboard",
         params={"district_id": 1, "season_id": 1, "year": 2026},
-        headers=auth_header(farmer_token),
+        headers={"Authorization": f"Bearer {farmer_token}"},
     )
-    assert resp.status_code == 403
-    assert resp.json()["error"]["code"] == "FORBIDDEN"
+    assert resp.status_code == 200
 
 
-def test_dashboard_allows_agri_business_and_admin(client, business_token, admin_token):
-    for token in (business_token, admin_token):
-        resp = client.get(
-            f"{API}/business/dashboard",
-            params={"district_id": 1, "season_id": 1, "year": 2026},
-            headers=auth_header(token),
-        )
-        assert resp.status_code == 200
-
-
-def test_dashboard_unknown_district_is_404(client, business_token):
+def test_dashboard_unknown_district_is_404(client):
     resp = client.get(
         f"{API}/business/dashboard",
         params={"district_id": 999, "season_id": 1, "year": 2026},
-        headers=auth_header(business_token),
     )
     assert resp.status_code == 404
 
 
-def test_dashboard_unknown_season_is_404(client, business_token):
+def test_dashboard_unknown_season_is_404(client):
     resp = client.get(
         f"{API}/business/dashboard",
         params={"district_id": 1, "season_id": 999, "year": 2026},
-        headers=auth_header(business_token),
     )
     assert resp.status_code == 404
 
 
-def test_dashboard_missing_required_query_param_is_400(client, business_token):
-    resp = client.get(f"{API}/business/dashboard", params={"district_id": 1}, headers=auth_header(business_token))
+def test_dashboard_missing_required_query_param_is_400(client):
+    resp = client.get(f"{API}/business/dashboard", params={"district_id": 1})
     assert resp.status_code == 400
 
 
-def test_dashboard_farmer_crop_intent_is_aggregated_never_per_farmer(client, business_token):
+def test_dashboard_farmer_crop_intent_is_aggregated_never_per_farmer(client):
     resp = client.get(
         f"{API}/business/dashboard",
         params={"district_id": 1, "season_id": 1, "year": 2025},
-        headers=auth_header(business_token),
     )
     assert resp.status_code == 200
     for row in resp.json()["farmer_crop_intent"]:
@@ -124,7 +108,7 @@ def test_forecast_rows_are_wellformed_whatever_the_batch_job_wrote(client, busin
             assert row["predicted_demand"] <= row["upper_bound"]
 
 
-def test_forecast_filters_by_district_product_and_year(client, business_token, db_conn):
+def test_forecast_filters_by_district_product_and_year(client, db_conn):
     _seed_forecast_row(db_conn)
     _seed_forecast_row(db_conn, district_id=2, model_version="test_v1_other_district")
     seeded = {"test_v1", "test_v1_other_district"}
@@ -150,17 +134,15 @@ def test_forecast_filters_by_district_product_and_year(client, business_token, d
 # ---------------------------------------------------------------
 
 
-def test_inventory_unfiltered_returns_all_203_seeded_rows(client, business_token):
-    resp = client.get(f"{API}/business/inventory", headers=auth_header(business_token))
+def test_inventory_unfiltered_returns_all_203_seeded_rows(client):
+    resp = client.get(f"{API}/business/inventory")
     assert resp.status_code == 200
     assert len(resp.json()) == 203
 
 
-def test_inventory_filtered_by_district_is_a_strict_subset(client, business_token):
-    all_rows = client.get(f"{API}/business/inventory", headers=auth_header(business_token)).json()
-    district_rows = client.get(
-        f"{API}/business/inventory", params={"district_id": 1}, headers=auth_header(business_token),
-    ).json()
+def test_inventory_filtered_by_district_is_a_strict_subset(client):
+    all_rows = client.get(f"{API}/business/inventory").json()
+    district_rows = client.get(f"{API}/business/inventory", params={"district_id": 1}).json()
     assert 0 < len(district_rows) < len(all_rows)
     for row in district_rows:
         assert set(row.keys()) == {"product_id", "quantity", "batch_no", "manufacturing_date", "expiry_date"}
@@ -171,8 +153,8 @@ def test_inventory_filtered_by_district_is_a_strict_subset(client, business_toke
 # ---------------------------------------------------------------
 
 
-def test_transfers_pairs_real_shortage_and_surplus_districts(client, business_token):
-    resp = client.get(f"{API}/business/transfers", headers=auth_header(business_token))
+def test_transfers_pairs_real_shortage_and_surplus_districts(client):
+    resp = client.get(f"{API}/business/transfers")
     assert resp.status_code == 200
     body = resp.json()
     assert len(body) > 0  # real seeded inventory/historical_sales produce at least one pairing
@@ -216,7 +198,7 @@ def test_alerts_are_wellformed_whatever_the_batch_job_wrote(client, business_tok
     assert all(r["district"] and r["product"] and r["message"] for r in body)
 
 
-def test_alerts_excludes_monitor_action_and_respects_district_filter(client, business_token, db_conn):
+def test_alerts_excludes_monitor_action_and_respects_district_filter(client, db_conn):
     _seed_recommendation_row(db_conn, action="DISPATCH", reason="Urea shortage expected")
     _seed_recommendation_row(db_conn, district_id=2, action="MONITOR", reason="nothing to see here")
 

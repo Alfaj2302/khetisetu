@@ -20,11 +20,11 @@ export const API_V1 = "/api/v1";
 /**
  * Optional bearer token.
  *
- * This app has no sign-in flow and does not call /auth/*. Two endpoint groups
- * are still gated server-side — /business/* wants an AGRI_BUSINESS or ADMIN
- * token and /rag/query wants any user — so the token is supplied as
- * configuration instead. Leave it unset and those screens show the API's own
- * 401 with what to configure; every other endpoint works without it.
+ * This app has no sign-in flow and does not call /auth/*. One endpoint group
+ * is still gated server-side — /rag/query wants any authenticated user — so
+ * the token is supplied as configuration instead. Leave it unset and the Ask
+ * screen shows the API's own 401 with what to configure; every other endpoint,
+ * /business/* included, works without it.
  *
  * Mint one against your database with:
  *   cd backend && .venv/bin/python -c "from app.security import create_access_token; \

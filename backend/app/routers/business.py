@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, Query
 from psycopg import Cursor
 
 from ..db import get_cursor
-from ..deps import require_roles
 from ..errors import ApiError
 from ..schemas import (
     AlertItem,
@@ -18,11 +17,12 @@ from ..schemas import (
 )
 from ..services import business as business_service
 
-router = APIRouter(
-    prefix="/business",
-    tags=["business"],
-    dependencies=[Depends(require_roles("AGRI_BUSINESS", "ADMIN"))],
-)
+# Open by design: this app has no sign-in flow, so the dashboard reads these
+# straight from the database. Everything served here is already aggregated —
+# `farmer_crop_intent` is grouped by crop and never selects user_id — so no
+# per-farmer row is exposed. Re-add a `require_roles("AGRI_BUSINESS", "ADMIN")`
+# router dependency if this API is ever exposed outside a trusted network.
+router = APIRouter(prefix="/business", tags=["business"])
 
 
 @router.get("/dashboard", response_model=BusinessDashboardResponse)
