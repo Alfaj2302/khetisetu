@@ -38,6 +38,20 @@ export const queryKeys = {
     alerts: (districtId?: number | null) =>
       [...queryKeys.business.all, "alerts", districtId ?? null] as const,
   },
+  rag: {
+    all: ["rag"] as const,
+    /**
+     * `computedContext` is part of the key on purpose: the same crop explained
+     * against a different opportunity score is a different explanation, so it
+     * must not be served from the previous score's cache entry.
+     */
+    explain: (
+      cropId: number | null,
+      districtId: number | null,
+      computedContext: Record<string, unknown> | null,
+    ) => [...queryKeys.rag.all, "explain", cropId, districtId, computedContext] as const,
+    status: () => [...queryKeys.rag.all, "status"] as const,
+  },
   health: {
     all: ["health"] as const,
     db: () => ["health", "db"] as const,

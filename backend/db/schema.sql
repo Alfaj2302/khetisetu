@@ -325,15 +325,40 @@ CREATE TABLE document_chunks (
     source_id              INT NOT NULL REFERENCES sources(id),
     chunk_index            INT NOT NULL,
     chunk_text             TEXT NOT NULL,
+    -- Retrieval filters on these BEFORE ranking by distance. NULL means
+    -- "applies generally", not "unknown": a NULL crop_id chunk is usable for
+    -- any crop, a set one is usable for that crop only.
     state_id               INT REFERENCES states(id),
     crop_id                INT REFERENCES crops(id),
     season_id              INT REFERENCES seasons(id),
     product_id             INT REFERENCES products(id),
-    embedding              VECTOR(1536),  -- dimension must match whatever embedding model Phase 2 of the RAG plan picks
+    -- voyage-3.5 at output_dimension 1024 (app/config.py EMBEDDING_DIM).
+    -- Changing the model means re-embedding the whole corpus: vectors from
+    -- two models are not comparable, and the mistake shows up as bad
+    -- neighbours rather than as an error.
+    embedding              VECTOR(1024),
+    embedding_model        VARCHAR(100),
+    -- Where the chunk came from inside its document, so a cited claim is
+    -- traceable to a location and not just to an organisation name.
+    page_start             INT,
+    page_end               INT,
+    char_start             INT,
+    char_end               INT,
+    token_count            INT,
+    -- Makes re-ingest idempotent (skip unchanged chunks without re-embedding)
+    -- and an accidental double-ingest detectable.
+    content_sha256         CHAR(64),
     created_at             TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (source_id, chunk_index)
+    UNIQUE (source_id, chunk_index),
+    CONSTRAINT chunk_embedding_has_model CHECK (embedding IS NULL OR embedding_model IS NOT NULL)
 );
--- Metadata filter first (state/crop/season), THEN similarity search on the
+-- Metadata filter first (crop/state/season), THEN similarity search on the
 -- filtered subset - the two-stage retrieval from the RAG dev plan, phase 3.
-CREATE INDEX idx_chunks_metadata ON document_chunks (state_id, crop_id, season_id);
-CREATE INDEX idx_chunks_embedding ON document_chunks USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+-- crop_id leads because it is the filter that must never be skipped.
+CREATE INDEX idx_chunks_metadata ON document_chunks (crop_id, state_id, season_id);
+-- HNSW, not IVFFlat: IVFFlat derives centroids from the rows present when the
+-- index is built, so building it on the empty table this schema creates gives
+-- meaningless centroids and poor recall until someone reindexes by hand. HNSW
+-- needs no training pass and is correct from the first inserted row.
+CREATE INDEX idx_chunks_embedding ON document_chunks USING hnsw (embedding vector_cosine_ops);
+CREATE INDEX idx_chunks_source ON document_chunks (source_id);

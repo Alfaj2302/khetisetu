@@ -7,6 +7,14 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
+  vite: {
+    // Pin the dev origin. Without this the server falls back through 8080, 8081,
+    // ... to whatever is free, so the origin changes between runs and the
+    // backend's CORS_ORIGINS (which lists :3000) stops matching — the app then
+    // reports "Could not reach the KhetiSetu API". strictPort makes a taken port
+    // a startup error instead of a silent shift back to that failure.
+    server: { port: 3000, strictPort: true },
+  },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this

@@ -30,6 +30,31 @@ from app.config import DATABASE_URL  # noqa: E402
 from app.db import get_cursor  # noqa: E402
 from app.main import app  # noqa: E402
 from app.security import create_access_token  # noqa: E402
+from app.services import embeddings, generation  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _offline_rag(monkeypatch):
+    """Keep the suite off the network and off the big local model.
+
+    Two separate hazards, both real:
+
+    * **Embeddings.** The default provider is local sentence-transformers, so
+      `available()` is True with no credential — any test that retrieves would
+      load BAAI/bge-m3: a 2.3GB download, ~24s per process, ~2.7GB resident.
+
+    * **Generation.** With GROQ_API_KEY present in `.env`, the suite made a real
+      billed API call and a test started failing because the live model
+      paraphrased where the assertion expected a verbatim quote. Tests that hit
+      a third-party endpoint are slow, nondeterministic, consume the free
+      tier's rate limit, and fail when the vendor retires a model.
+
+    So both default to off, and retrieval defaults to the metadata path. Tests
+    that want either opt back in by patching `available` (plus a fake client or
+    `embed_query`) themselves — monkeypatch inside a test wins over this one.
+    """
+    monkeypatch.setattr(embeddings, "available", lambda: False)
+    monkeypatch.setattr(generation, "available", lambda: False)
 
 
 @pytest.fixture()

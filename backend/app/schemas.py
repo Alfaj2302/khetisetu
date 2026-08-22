@@ -99,6 +99,19 @@ class CropRecommendationRequest(BaseModel):
     sowing_month: Month
 
 
+class ScoreComponents(BaseModel):
+    """The four terms behind opportunity_pct, each 0-100.
+
+    Exposed so the UI can show a farmer WHY a crop scored what it did, instead
+    of one opaque percentage. `weights` on the parent says how they combine.
+    """
+
+    weather_fit: float
+    demand_supply: float
+    demand_trend: float
+    stability: float
+
+
 class DistrictRef(BaseModel):
     id: int
     name: str
@@ -124,6 +137,9 @@ class RecommendationItem(BaseModel):
     weather_suitability_score: int
     confidence_pct: int
     confidence_basis: str
+    components: ScoreComponents
+    component_notes: dict[str, str]
+    weights: dict[str, float]
 
 
 class CropRecommendationResponse(BaseModel):
@@ -131,6 +147,9 @@ class CropRecommendationResponse(BaseModel):
     district: DistrictRef
     season_id: int | None
     recommendations: list[RecommendationItem]
+    # Set only when `recommendations` is empty, to say why. Optional so every
+    # existing caller keeps working unchanged.
+    notice: str | None = None
 
 
 # ---------------------------------------------------------------
@@ -218,6 +237,12 @@ class CropDetailResponse(BaseModel):
     risk: RiskInfo
     confidence_pct: int
     sources: list[SourceRef]
+    components: ScoreComponents
+    component_notes: dict[str, str]
+    weights: dict[str, float]
+    # Which month the score was computed for. Callers that pass sowing_month get
+    # it back; callers that don't can see which month was assumed.
+    reference_month: int
 
 
 # ---------------------------------------------------------------
@@ -235,6 +260,10 @@ class ScenarioScore(BaseModel):
     crop_id: int
     opportunity_pct: int
     change: str
+    baseline_opportunity_pct: int
+    # weather_fit is the only term rainfall moves, so surfacing it explains the
+    # delta rather than leaving the farmer to trust it.
+    weather_fit: float
 
 
 class ScenarioResponse(BaseModel):
@@ -269,7 +298,8 @@ class CropIntentResponse(BaseModel):
 
 class InputDemandItem(BaseModel):
     product: str
-    quantity_mt: float
+    quantity: float
+    unit: str  # "packets" - the forecast's native unit, not metric tons
 
 
 class CropIntentSummaryItem(BaseModel):
@@ -285,12 +315,17 @@ class AlertItem(BaseModel):
 
 
 class RecommendedAction(BaseModel):
+    # These were forecast_mt / current_stock_mt / etc. Nothing in the pipeline
+    # produces metric tons - the model is trained on historical_sales.qty_in_pkts
+    # and `recommendations` stores packets - so the _mt suffix was a 1000x
+    # mislabel on a dispatch decision. `unit` now states it explicitly.
     product: str
-    forecast_mt: float | None
-    current_stock_mt: float | None
-    safety_stock_mt: float | None
-    recommended_dispatch_mt: float | None
+    forecast: float | None
+    current_stock: float | None
+    safety_stock: float | None
+    recommended_dispatch: float | None
     action: str
+    unit: str
 
 
 class BusinessDashboardResponse(BaseModel):
@@ -344,9 +379,65 @@ class RagQueryRequest(BaseModel):
 class RagSourceRef(BaseModel):
     source_id: int
     organization: str | None
+    # An organisation name alone is not a citation the reader can check, so the
+    # bibliographic detail travels with it.
+    title: str | None = None
+    url: str | None = None
+    source_type: str | None = None
+    publication_date: str | None = None
+
+
+class RagCitation(BaseModel):
+    """A passage that actually supports a claim in the answer.
+
+    Distinct from `sources`: `sources` is what was consulted, this is what was
+    used. Populated from the Messages API's own citation blocks, so it cannot
+    point at a passage the model did not cite.
+    """
+
+    source_id: int
+    chunk_id: int
+    cited_text: str | None = None
+    page_start: int | None = None
+    page_end: int | None = None
+
+
+class CropRefLite(BaseModel):
+    id: int
+    name: str
 
 
 class RagQueryResponse(BaseModel):
     answer: str
     sources: list[RagSourceRef]
     used_placeholder_data: bool
+    citations: list[RagCitation] = []
+    # True only when every claim traces to a retrieved passage or a database
+    # column. False means the answer is a decline.
+    grounded: bool = False
+    declined: bool = False
+    # "model" | "template" | "extractive" - lets the UI (and a reviewer) tell a
+    # missing provider apart from a weak answer.
+    generated_by: str = "template"
+    # "vector" | "metadata" | "none"
+    retrieval: str = "none"
+    # Which crops the question named, in ask mode. Two means it was refused.
+    crops_detected: list[CropRefLite] = []
+
+
+class RagStatusResponse(BaseModel):
+    chunks: int
+    chunks_embedded: int
+    sources_indexed: int
+    embedding_models_present: int
+    generation_model: str | None
+    generation_available: bool
+    embedding_model: str | None
+    embeddings_available: bool
+    # False means citations are verified quotes rather than reported by the API.
+    native_citations: bool = False
+    # Last transport failure from the generation backend, if any. Populated
+    # because `generation_available` can only report configuration - a wrong
+    # model name or revoked key looks fine until something is actually sent.
+    last_generation_error: str | None = None
+    readiness: str

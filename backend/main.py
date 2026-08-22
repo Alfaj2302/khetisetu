@@ -1,8 +1,8 @@
 """Dev entry point for the KhetiSetu API.
 
-Usage (after src/backend/.env is set up and sync.py/seed.py have been run):
-    pip install -r src/backend/requirements.txt
-    python src/backend/main.py
+Usage (after backend/.env is set up and sync.py/seed.py have been run):
+    pip install -r backend/requirements.txt
+    python backend/main.py
 """
 
 from __future__ import annotations

@@ -239,6 +239,9 @@
     "title": "Why did KhetiSetu recommend {{crop}}?",
     "decisionTrace": "Decision trace",
     "loadingTrace": "Loading decision trace…",
+    "grounded": "Why, from the sources",
+    "loadingGrounded": "Reading the source documents…",
+    "noSourcesYet": "No source document has been indexed for this crop yet, so this explanation is built from the recorded demand and supply figures only.",
     "disclaimer": "KhetiSetu does not guarantee crop profitability. This ranking is decision support computed from recorded demand, supply and weather data for your district."
   },
   "weather": {
@@ -379,7 +382,7 @@
       "emptyTitle": "No forecast rows yet",
       "emptyDetail": "This reads the API's forecast table, written by the batch ML job. Until that job has run, there is nothing to show."
     },
-    "megaTonnes": "{{value}} MT",
+    "quantityWithUnit": "{{value}} {{unit}}",
     "intent": {
       "title": "Farmer crop intent",
       "description": "Aggregated and anonymized — grouped by crop, never by farmer.",
